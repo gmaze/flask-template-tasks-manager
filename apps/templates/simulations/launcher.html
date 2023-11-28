@@ -1,0 +1,185 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Simulations page {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+	<!-- [ Main Content ] start -->
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+			<!-- [ breadcrumb ] start -->
+			<div class="page-header">
+				<div class="page-block">
+					<div class="row align-items-center">
+						<div class="col-md-12">
+							<div class="page-header-title">
+								<h5 class="m-b-10">Simulations Page</h5>
+							</div>
+							<ul class="breadcrumb">
+								<li class="breadcrumb-item"><a href="/"><i class="feather icon-home"></i></a></li>
+								<li class="breadcrumb-item"><a href="#">Simulations</a></li>
+								<li class="breadcrumb-item"><a href="#">Launcher</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- [ breadcrumb ] end -->
+
+			<!-- [ Main Content ] start -->
+			<div class="row">
+
+				<!-- [ Create a new simulation-page ] start -->
+				<div class="col-md-12">
+					<div class="card g-3 col-md-6">
+
+						<div class="card-header">
+							<h5>Create a new simulation</h5>
+						</div>
+						<div class="card-body">
+
+                            <form method="post" action="">
+
+								{{ form.hidden_tag() }}
+
+								<div class="input-group mb-4">
+									<span class="input-group-text"><i class="feather icon-type"></i></span>
+									{{ form.label(placeholder="Simulation Label", class="form-control") }}
+								</div>
+
+                                  <div class="input-group mb-4">
+                                    <span class="input-group-text"><i class="feather icon-life-buoy"></i>&ensp;Number of virtual floats</span>
+                                    <span class="form-control" id="nfloats_value"></span>
+									{{ form.nb_floats(class="form-range", min="100", max="5000", step="100") }}
+                                  </div>
+
+								<button type="submit" name="launch" class="btn btn-block btn-primary mt-2 mb-4">Launch !</button>
+
+							</form>
+
+						</div>
+					</div>
+				</div>
+				<!-- [ Create a new simulation-page ] end -->
+
+				<!-- [ List of user simulations-page ] start -->
+				<div class="col-md-12">
+					<div class="card table-card">
+						<div class="card-header">
+							<h5>Your simulations</h5>
+						</div>
+						<div class="card-body">
+                            <div class="table-responsive">
+                                <div class="customer-scroll" style="height:362px;position:relative;">
+                                    <table class="table table-hover m-b-0" id="tasks_table">
+                                        <thead>
+                                            <tr>
+                                                <th><span>Tasks</span></th>
+                                                <th><span>Status <a class="help" data-toggle="popover" title="Popover title" data-content=""><i class="feather icon-help-circle f-16"></i></a></span></th>
+                                                <th><span>Number of floats <a class="help" data-toggle="popover" title="Popover title" data-content=""><i class="feather icon-help-circle f-16"></i></a></span></th>
+                                                <th><span>Label <a class="help" data-toggle="popover" title="Popover title" data-content=""><i class="feather icon-help-circle f-16"></i></a></span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- [ List of user simulations-page ] end -->
+
+			</div>
+			<!-- [ Main Content ] end -->
+		</div>
+	</div>
+	<!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+
+    <script src="/static/assets/js/pages/simulations-launcher.js"></script>
+
+    <script>
+    var API =  {{ url_for("api_blueprint.tasks_task_list") | tojson }}
+
+    clean_up_form = function(){
+      // Clean-up the form:
+      $('input[name=label]').text("");
+      $('input[name=nb_floats]').val(2000);
+      $('#nfloats_value').text($('input[name=nb_floats]').val());
+    }
+
+    submit_new_job = function(label, N, api) {
+        let params = {
+            'label': label,
+            'nfloats': N
+        }
+        $.ajax({
+          url:api,
+          type:"POST",
+          data:JSON.stringify(params),
+          contentType:"application/json; charset=utf-8",
+          dataType:"json",
+          success: function(data){
+              console.log(data);
+              refresh_list_tasks();
+              clean_up_form();
+          }
+        })
+    };
+
+    {#$("button[name='launch']").click(function(){#}
+    {#    let label = $('input[name=label]').val();#}
+    {#    let nfloats = $('input[name=nb_floats]').val();#}
+    {#    submit_new_job(label, nfloats, API);#}
+    {#})#}
+
+    list_tasks = function(api) {
+        $.ajax({
+          url:api,
+          type:"GET",
+          contentType:"application/json; charset=utf-8",
+          dataType:"json",
+          success: function(data){
+            var html = '';
+            for(var i = data.length-1; i >= 0; i--){
+                html += '<tr>'+
+                            '<td>' + data[i].id + '</td>' +
+                            '<td>' + data[i].status + '</td>' +
+                            '<td>' + data[i].nfloats + '</td>' +
+                            '<td>' + data[i].label + '</td>' +
+                        '</tr>';
+                }
+            $('#tasks_table tbody').html(html);
+          }
+        })
+    };
+
+    refresh_list_tasks = function(){
+        list_tasks(API);
+        console.log('Refreshing taks list...');
+    }
+
+    var RefreshThis = window.setInterval(function(){
+      refresh_list_tasks()
+    }, 5000);
+
+    $( document ).ready(function() {
+        clean_up_form();
+        refresh_list_tasks();
+    })
+
+
+    </script>
+
+
+{% endblock javascripts %}

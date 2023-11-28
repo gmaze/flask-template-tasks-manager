@@ -21,7 +21,10 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
-    for module_name in ('authentication', 'home'):
+    from .apis import blueprint as api  # Cannot be imported before db.init_app
+    app.register_blueprint(api, url_prefix='/api/1')
+
+    for module_name in ('authentication', 'home', 'simulations'):
         module = import_module('apps.{}.routes'.format(module_name))
         app.register_blueprint(module.blueprint)
 

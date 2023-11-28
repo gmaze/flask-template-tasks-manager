@@ -1,0 +1,23 @@
+name: flask-template-tasks
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - email-validator=2.0.0
+  - flask=2.2.5
+  - flask-login=0.6.2
+  - flask-migrate=4.0.4
+  - flask-restx=1.1.0
+  - flask-sqlalchemy=3.0.3
+  - flask-wtf=1.2.1
+  - jinja2=3.1.2
+  - sqlalchemy=2.0.21
+  - werkzeug=2.3.7
+  - wtforms=3.0.1
+  - pip
+  - pip:
+      - flask_minify==0.37
+
+#gunicorn==20.1.0
+# flask_mysqldb
+# psycopg2-binary
