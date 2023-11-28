@@ -5,10 +5,18 @@
 #
 # Created by gmaze on 28/11/2023
 
+from datetime import datetime
+from sqlalchemy import DateTime
+from sqlalchemy.orm import Mapped, mapped_column
 from apps import db
 
 
-class Tasks(db.Model):
+class TimestampMixin:
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Tasks(db.Model, TimestampMixin):
 
     __tablename__ = 'Tasks'
 

@@ -41,7 +41,7 @@
 						</div>
 						<div class="card-body">
 
-                            <form method="post" action="">
+                            <form method="post" action="" id="launch_form">
 
 								{{ form.hidden_tag() }}
 
@@ -53,10 +53,11 @@
                                   <div class="input-group mb-4">
                                     <span class="input-group-text"><i class="feather icon-life-buoy"></i>&ensp;Number of virtual floats</span>
                                     <span class="form-control" id="nfloats_value"></span>
-									{{ form.nb_floats(class="form-range", min="100", max="5000", step="100") }}
+									{{ form.nb_floats(class="form-range", min="100", max="4000", step="10") }}
                                   </div>
 
 								<button type="submit" name="launch" class="btn btn-block btn-primary mt-2 mb-4">Launch !</button>
+								<button type="reset" name="reset" class="btn btn-block btn-danger mt-2 mb-4">Reset</button>
 
 							</form>
 
@@ -73,14 +74,15 @@
 						</div>
 						<div class="card-body">
                             <div class="table-responsive">
-                                <div class="customer-scroll" style="height:362px;position:relative;">
+                                <div class="customer-scroll" style="height:562px;position:relative;">
                                     <table class="table table-hover m-b-0" id="tasks_table">
                                         <thead>
                                             <tr>
                                                 <th><span>Tasks</span></th>
-                                                <th><span>Status <a class="help" data-toggle="popover" title="Popover title" data-content=""><i class="feather icon-help-circle f-16"></i></a></span></th>
-                                                <th><span>Number of floats <a class="help" data-toggle="popover" title="Popover title" data-content=""><i class="feather icon-help-circle f-16"></i></a></span></th>
-                                                <th><span>Label <a class="help" data-toggle="popover" title="Popover title" data-content=""><i class="feather icon-help-circle f-16"></i></a></span></th>
+                                                <th><span>User</span></th>
+                                                <th><span>Status</span></th>
+                                                <th><span>Number of floats</span></th>
+                                                <th><span>Label</span></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -111,37 +113,13 @@
     <script>
     var API =  {{ url_for("api_blueprint.tasks_task_list") | tojson }}
 
-    clean_up_form = function(){
+    $('button[name=reset]').on('click', function(){
       // Clean-up the form:
-      $('input[name=label]').text("");
-      $('input[name=nb_floats]').val(2000);
+      $('input[name=label]').val("");
+      $('input[name=nb_floats]').val();
       $('#nfloats_value').text($('input[name=nb_floats]').val());
-    }
-
-    submit_new_job = function(label, N, api) {
-        let params = {
-            'label': label,
-            'nfloats': N
-        }
-        $.ajax({
-          url:api,
-          type:"POST",
-          data:JSON.stringify(params),
-          contentType:"application/json; charset=utf-8",
-          dataType:"json",
-          success: function(data){
-              console.log(data);
-              refresh_list_tasks();
-              clean_up_form();
-          }
-        })
-    };
-
-    {#$("button[name='launch']").click(function(){#}
-    {#    let label = $('input[name=label]').val();#}
-    {#    let nfloats = $('input[name=nb_floats]').val();#}
-    {#    submit_new_job(label, nfloats, API);#}
-    {#})#}
+      console.log("Form reset");
+    } );
 
     list_tasks = function(api) {
         $.ajax({
@@ -151,9 +129,11 @@
           dataType:"json",
           success: function(data){
             var html = '';
-            for(var i = data.length-1; i >= 0; i--){
+            for(var i = 0; i < data.length; i++){
+            {#for(var i = data.length-1; i >= 0; i--){#}
                 html += '<tr>'+
                             '<td>' + data[i].id + '</td>' +
+                            '<td>' + data[i].username + '</td>' +
                             '<td>' + data[i].status + '</td>' +
                             '<td>' + data[i].nfloats + '</td>' +
                             '<td>' + data[i].label + '</td>' +
@@ -164,18 +144,14 @@
         })
     };
 
-    refresh_list_tasks = function(){
+    var RefreshTasksList = window.setInterval(function(){
         list_tasks(API);
-        console.log('Refreshing taks list...');
-    }
-
-    var RefreshThis = window.setInterval(function(){
-      refresh_list_tasks()
+        console.log('Refreshing tasks list...');
     }, 5000);
 
     $( document ).ready(function() {
-        clean_up_form();
-        refresh_list_tasks();
+        $('button[name=reset]').trigger('click');
+        list_tasks(API);
     })
 
 

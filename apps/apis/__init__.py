@@ -25,5 +25,5 @@ api = Api(blueprint,
             title='VirtualFleet-Recovery',
             version='1.0',
             description='An API to make VirtualFleet-Recovery simulations')
-api.add_namespace(ns1)
+# api.add_namespace(ns1)
 api.add_namespace(ns2)
