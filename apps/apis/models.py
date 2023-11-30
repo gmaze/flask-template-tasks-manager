@@ -27,6 +27,7 @@ class Tasks(db.Model, TimestampMixin):
     nfloats = db.Column(db.Integer)
     status = db.Column(db.String(64))
     pid = db.Column(db.Integer)
+    progress = db.Column(db.Float, default=0)
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
@@ -43,6 +44,7 @@ class Tasks(db.Model, TimestampMixin):
         summary.append("Username: %s" % self.username)
         summary.append("Status: %s" % self.status)
         summary.append("PID: %s" % self.pid)
+        summary.append("Progress: %s" % self.progress)
         summary.append("Parameters:")
         summary.append("\tN-floats: %s" % self.nfloats)
         summary.append("\tlabel: %s" % self.label)

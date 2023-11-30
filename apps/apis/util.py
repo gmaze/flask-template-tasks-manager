@@ -16,7 +16,7 @@ import os
 
 from apps.apis.models import Tasks as dbTasks
 from apps import db
-from apps.application import read_status_for_pid
+from apps.application import read_data_for_pid
 
 BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -126,16 +126,22 @@ class TasksManager(TasksManager_proto):
     """Applicative part"""
 
     def update_job_status(self, id: int = None):
+
+        def update(pid):
+            # task.status = read_status_for_pid(pid)
+            data = read_data_for_pid(pid)
+            task.status = data['status']
+            task.progress = data['progress']
+            self.db_session.commit()
+
         if id is not None:
             task = self.get(id)
             if task.pid is not None:
-                task.status = read_status_for_pid(task.pid)
-                self.db_session.commit()
+                update(task.pid)
         else:
             for task in self.tasks:
                 if task.pid is not None:
-                    task.status = read_status_for_pid(task.pid)
-                    self.db_session.commit()
+                    update(task.pid)
         return self
 
     def _launch(self, a_task: dbTasks):

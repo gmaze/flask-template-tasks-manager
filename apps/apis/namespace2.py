@@ -2,8 +2,7 @@ from flask_restx import Namespace, Resource, fields
 
 from apps import db
 from apps.apis.util import TaskDAO, TasksManager
-from flask import current_app as app
-from apps.application import read_status_for_pid
+
 
 api = Namespace('tasks', description='Tasks')
 
@@ -15,6 +14,7 @@ task = api.model('Task', {
     'status': fields.String(required=True, description='Task processing status', default='queue'),
     'created': fields.DateTime(description='Task creation timestamp'),
     'updated': fields.DateTime(description='Task last update timestamp'),
+    'progress': fields.Float(description='Task progress in percentage'),
 })
 
 TASKS = TaskDAO(api)
