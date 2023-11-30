@@ -9,7 +9,8 @@ from datetime import datetime
 from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from apps import db
-
+import json
+from datetime import date, datetime
 
 class TimestampMixin:
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
@@ -25,6 +26,7 @@ class Tasks(db.Model, TimestampMixin):
     label = db.Column(db.String(64))
     nfloats = db.Column(db.Integer)
     status = db.Column(db.String(64))
+    pid = db.Column(db.Integer)
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
@@ -34,8 +36,32 @@ class Tasks(db.Model, TimestampMixin):
             if hasattr(value, '__iter__') and not isinstance(value, str):
                 # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
                 value = value[0]
-            print(property, value)
             setattr(self, property, value)
 
     def __repr__(self):
-        return str("%s: %s (%s): %s" % (self.username, self.nfloats, self.status, self.label))
+        summary = ["<Tasks>"]
+        summary.append("Username: %s" % self.username)
+        summary.append("Status: %s" % self.status)
+        summary.append("PID: %s" % self.pid)
+        summary.append("Parameters:")
+        summary.append("\tN-floats: %s" % self.nfloats)
+        summary.append("\tlabel: %s" % self.label)
+        return "\n".join(summary)
+        # return str("%s: %s (%s): %s" % (self.username, self.nfloats, self.status, self.label))
+
+    def to_dict(self):
+        params = {}
+        for k in ['id', 'username', 'label', 'nfloats', 'status', 'created', 'updated', 'pid']:
+            params[k] = getattr(self, k)
+        return params
+
+    def _json_serial(self, obj):
+        """JSON serializer for objects not serializable by default json code"""
+
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        raise TypeError("Type %s not serializable" % type(obj))
+
+    def to_json(self):
+        data = self.to_dict()
+        return json.dumps(data, default=self._json_serial, ensure_ascii=False)

@@ -10,8 +10,8 @@ from flask import (
     redirect,
     request,
     url_for,
-    current_app,
 )
+from flask import current_app as app
 from flask_login import (
     current_user,
     login_user,
@@ -19,11 +19,20 @@ from flask_login import (
     login_required,
 )
 
-from apps import db, login_manager
+from flask_sqlalchemy.session import Session
+
+from apps import db
 from apps.simulations import blueprint
 from apps.simulations.forms import SimulationForm
 from apps.apis.models import Tasks
 from apps.authentication.models import Users
+from apps.apis.util import TasksManager
+
+
+print("simulations.routes")
+print(db.session)
+print(type(db.session))
+T = TasksManager(db.session)
 
 
 @blueprint.route('/simulations/launch', methods=['GET', 'POST'])
@@ -44,9 +53,12 @@ def simulations():
         params = {'username': user.username,
                   'label': label,
                   'nfloats': nfloats}
-        task = Tasks(**params)
-        db.session.add(task)
-        db.session.commit()
+        # task = Tasks(**params)
+        # db.session.add(task)
+        # db.session.commit()
+        # dbs = Session(db)
+        # with app.app_context():
+        TasksManager(db.session).create(params)
 
         return render_template('simulations/launcher.html',
                                form=SimulationForm(request.form),
