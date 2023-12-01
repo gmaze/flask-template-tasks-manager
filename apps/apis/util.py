@@ -71,14 +71,6 @@ class TasksManager_proto:
         """
         raise NotImplementedError("Not implemented")
 
-    @abstractmethod
-    def _cancel(self, dbTasks):
-        raise NotImplementedError("Not implemented")
-
-    @abstractmethod
-    def _delete(self, dbTasks):
-        raise NotImplementedError("Not implemented")
-
     def create(self, data: dict) -> dbTasks:
         a_task = self._register(data)
         a_task, result = self._launch(a_task)
@@ -96,6 +88,10 @@ class TasksManager_proto:
 
         return a_task
 
+    @abstractmethod
+    def _delete(self, obj: dbTasks):
+        raise NotImplementedError("Not implemented")
+
     def delete(self, id: int) -> dbTasks:
         a_task = self.get(id)
         try:
@@ -106,6 +102,10 @@ class TasksManager_proto:
             self.db_session.delete(a_task)
             self.db_session.commit()
         return a_task
+
+    @abstractmethod
+    def _cancel(self, obj: dbTasks):
+        raise NotImplementedError("Not implemented")
 
     def cancel(self, id: int) -> dbTasks:
         a_task = self.get(id)

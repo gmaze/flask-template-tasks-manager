@@ -19,9 +19,6 @@ task = api.model('Task', {
 })
 
 
-# print("apis.namespace2")
-# print(db.session)
-# print(type(db.session))
 T = TasksManager(db.session)
 
 
@@ -41,7 +38,7 @@ class TaskList(Resource):
         return T.create(api.payload), 201
 
 
-@api.route('/<id>')
+@api.route('/<int:id>')
 @api.param('id', 'The task identifier')
 @api.response(404, 'Task not found')
 @api.response(403, 'Task has not been executed and cannot be cancelled')
@@ -54,7 +51,8 @@ class Task(Resource):
 
     @api.doc('delete_task')
     @api.response(204, 'Task cancelled')
+    @api.marshal_with(task, code=204)
     def delete(self, id):
         """Delete is for cancelling a task given its identifier"""
-        T.update_job_status(id).cancel(id)
+        T.cancel(id)
         return self.get(id), 204
