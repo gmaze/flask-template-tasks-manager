@@ -28,6 +28,7 @@ class Tasks(db.Model, TimestampMixin):
     status = db.Column(db.String(64))
     pid = db.Column(db.Integer)
     progress = db.Column(db.Float, default=0)
+    final_state = db.Column(db.String(64), default='?')
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
@@ -45,6 +46,7 @@ class Tasks(db.Model, TimestampMixin):
         summary.append("Status: %s" % self.status)
         summary.append("PID: %s" % self.pid)
         summary.append("Progress: %s" % self.progress)
+        summary.append("Final state: %s" % self.final_state)
         summary.append("Parameters:")
         summary.append("\tN-floats: %s" % self.nfloats)
         summary.append("\tlabel: %s" % self.label)
@@ -53,7 +55,7 @@ class Tasks(db.Model, TimestampMixin):
 
     def to_dict(self):
         params = {}
-        for k in ['id', 'username', 'label', 'nfloats', 'status', 'created', 'updated', 'pid']:
+        for k in ['id', 'username', 'label', 'nfloats', 'status', 'created', 'updated', 'pid', 'final_state', 'progress']:
             params[k] = getattr(self, k)
         return params
 

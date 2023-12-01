@@ -83,7 +83,7 @@
                                                 <th><span>Status</span></th>
                                                 <th><span>Number of floats</span></th>
                                                 <th><span>Label</span></th>
-                                                <th></th>
+                                                <th><span>Actions</span></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -122,18 +122,19 @@
       console.log("Form reset");
     } );
 
-    html_progress = function(value, vmin=0, vmax=100, color='secondary'){
+    html_progress = function(value, vmin=0, vmax=100, color='secondary', txt){
         {#let html = "" + value;#}
         let width = Number(value) * 100 / (vmax-vmin);
         width = width.toFixed(0);
         {#console.log(width);#}
         let html = "";
-        html += "<div class='progress mt-1' style='height:4px;'>";
+        {#html += "<div class='progress mt-1' style='height:6px;'>";#}
+        html += "<div class='progress mt-1'>";
         html += "<div class='progress-bar bg-" + color + " rounded' role='progressbar' style='width: "+width+"%;'";
         html += " aria-valuenow='"+value+"'";
         html += " aria-valuemin='"+vmin+"' ";
         html += "aria-valuemax='"+vmax+"'>";
-        html += "</div></div>";
+        html += width + "%</div></div>";
         return html
     }
 
@@ -147,32 +148,51 @@
             var html = '';
             for(var i = 0; i < data.length; i++){
                 var html_status = data[i].status + " ";
-                let progress = Number(data[i].progress);
-                let color;
+                var progress = Number(data[i].progress);
+                var color;
+                var cancel_disabled = "";
 
                 if (data[i].status === 'queue') {
-                    html_status += "<i class='feather icon-clock'></i>";
+                    {#html_status += "<i class='feather icon-clock'></i>";#}
                     color = 'info';
+                    cancel_disabled = "disabled";
 
                 } else if (data[i].status === 'error'){
-                    html_status += "<i class='feather icon-phone-missed'></i>";
+                    {#html_status += "<i class='feather icon-phone-missed'></i>";#}
                     color = 'danger';
+                    cancel_disabled = "disabled";
+
+                } else if (data[i].status === 'cancelled'){
+                    {#html_status += "<i class='feather icon-phone-missed'></i>";#}
+                    color = 'warning';
+                    cancel_disabled = "disabled";
 
                 } else if (data[i].status === 'running'){
-                    html_status += "<i class='feather icon-phone-call'></i>";
+                    {#html_status += "<i class='feather icon-phone-call'></i>";#}
                     color = 'primary';
 
                 } else if (data[i].status === 'done'){
-                    html_status += "<i class='feather icon-phone-off'></i>";
-                    color = 'success';
+                    {#html_status += "<i class='feather icon-phone-off'></i>";#}
+                    cancel_disabled = "disabled";
+                    if (data[i].final_state === 'success') {
+                        color = 'success';
+                        html_status += "(success)";
+                    } else if (data[i].final_state === 'failed') {
+                        color = 'danger';
+                        html_status += "(failed)";
+                    }
                     progress = 100;
 
                 } else {
-                    html_status += "<i class='feather icon-alert-circle'></i>";
+                    {#html_status += "<i class='feather icon-alert-circle'></i>";#}
                     color = 'danger';
                 }
 
-                html_status += html_progress(progress, 0, 100, color);
+                {#var html_status = data[i].status + " ";#}
+                html_status += html_progress(progress, 0, 100, color, data[i].status);
+
+                var html_actions = "<button type='button' class='btn btn-outline-danger btn-sm' "+cancel_disabled+">Cancel</button>";
+
 
                 html += '<tr>'+
                             '<td>' + data[i].id + '</td>' +
@@ -180,7 +200,7 @@
                             '<td>' + html_status + '</td>' +
                             '<td>' + data[i].nfloats + '</td>' +
                             '<td>' + data[i].label + '</td>' +
-                            '<td>' + 'Cancel' + '</td>' +
+                            '<td>' + html_actions + '</td>' +
                         '</tr>';
                 }
             $('#tasks_table tbody').html(html);

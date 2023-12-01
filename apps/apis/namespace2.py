@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 
 from apps import db
-from apps.apis.util import TaskDAO, TasksManager
+from apps.apis.util import TasksManager
 
 
 api = Namespace('tasks', description='Tasks')
@@ -9,18 +9,15 @@ api = Namespace('tasks', description='Tasks')
 task = api.model('Task', {
     'id': fields.Integer(required=True, description='The task identifier'),
     'username': fields.String(required=False, description='User login name', default=""),
+    'created': fields.DateTime(description='Task creation timestamp'),
+    'updated': fields.DateTime(description='Task last update timestamp'),
     'label': fields.String(required=False, description='A label for this task', default=""),
     'nfloats': fields.Integer(required=True, description='Number of floats', default=1000),
     'status': fields.String(required=True, description='Task processing status', default='queue'),
-    'created': fields.DateTime(description='Task creation timestamp'),
-    'updated': fields.DateTime(description='Task last update timestamp'),
     'progress': fields.Float(description='Task progress in percentage'),
+    'final_state': fields.String(description='Task final state [success/failed]', default='?'),
 })
 
-TASKS = TaskDAO(api)
-TASKS.create({'label': 'Build an API', 'status': 'done'})
-TASKS.create({'label': '?????', 'status': 'cancelled'})
-TASKS.create({'label': 'profit!', 'status': 'running'})
 
 # print("apis.namespace2")
 # print(db.session)
@@ -34,7 +31,7 @@ class TaskList(Resource):
     @api.marshal_list_with(task)
     def get(self):
         """List all tasks"""
-        return T.update_job_status().tasks
+        return T.tasks
 
     @api.doc('create_task')
     @api.expect(task)
@@ -47,24 +44,17 @@ class TaskList(Resource):
 @api.route('/<id>')
 @api.param('id', 'The task identifier')
 @api.response(404, 'Task not found')
+@api.response(403, 'Task has not been executed and cannot be cancelled')
 class Task(Resource):
     @api.doc('get_task')
     @api.marshal_with(task)
     def get(self, id):
         """Fetch a task given its identifier"""
-        return T.update_job_status(id).get(id)
+        return T.get(id)
 
     @api.doc('delete_task')
-    @api.response(204, 'Task deleted')
+    @api.response(204, 'Task cancelled')
     def delete(self, id):
-        """Delete a task given its identifier"""
-        TASKS.delete(id)
-        return '', 204
-
-    # @api.expect(task)
-    # @api.marshal_with(task)
-    # def put(self, id):
-    #     """Update a task given its identifier"""
-    #     return TASKS.update(id, api.payload)
-
-
+        """Delete is for cancelling a task given its identifier"""
+        T.update_job_status(id).cancel(id)
+        return self.get(id), 204

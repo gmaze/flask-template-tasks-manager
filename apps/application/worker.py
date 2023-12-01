@@ -52,22 +52,29 @@ def read_progress_for_pid(pid):
 def read_data_for_pid(pid):
     pattern1 = ("INFO / worker / %i / status: " % pid)
     pattern2 = ("INFO / worker / %i / progress: " % pid)
-    lines1, lines2 = [], []
+    pattern3 = ("INFO / worker / %i / result: " % pid)
+    lines1, lines2, lines3 = [], [], []
     with open(logfile(), 'r') as log:
         for line in log:
             if pattern1 in line.strip():
                 lines1.append(line.strip())
             if pattern2 in line.strip():
                 lines2.append(line.strip())
+            if pattern3 in line.strip():
+                lines3.append(line.strip())
     if len(lines1) == 0:
         raise ValueError("Cannot find status for this PID in log file")
     else:
         status = lines1[-1].split("/")[-1].replace("status:","").strip()
         if len(lines2) == 0:
-            progress = 0
+            progress = None
         else:
             progress = float(lines2[-1].split("/")[-1].replace("progress:","").strip())
-        return {'status': status, 'progress': progress}
+        if len(lines3) == 0:
+            result = '?'
+        else:
+            result = lines3[-1].split("/")[-1].replace("result:","").strip()
+        return {'status': status, 'progress': progress, 'result': result}
 
 
 
@@ -82,7 +89,7 @@ def dummy_task(data):
     for i in range(TimeLapse):
         time.sleep(1)
         log.info("progress: %0.1f" % (i*100/TimeLapse))
-    return True
+    return int(time.time()) & 0x1
 
 
 
@@ -91,7 +98,8 @@ if __name__ == '__main__':
     logging.basicConfig(
         level=logging.DEBUG,
         format=DEBUGFORMATTER,
-        datefmt='%I:%M:%S %p',
+        # datefmt='%I:%M:%S %p',
+        datefmt='%d/%m %H:%M:%S',
         handlers=[logging.FileHandler(logfile(), mode='a')]
     )
 
