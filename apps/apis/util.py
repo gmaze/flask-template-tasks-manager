@@ -111,12 +111,11 @@ class TasksManager_proto:
         a_task = self.get(id)
         try:
             self._cancel(a_task)
-        except:
-            raise
-        finally:
             # Update status:
             a_task.status = 'cancelled'
             self.db_session.commit()
+        except:
+            raise
         return a_task
 
     def check_pid(self, pid):
@@ -130,6 +129,9 @@ class TasksManager_proto:
         return psutil.pid_exists(pid)
 
     def kill_pid(self, pid):
+        if self.check_pid(pid):
+            os.kill(pid, SIGKILL)
+
         if self.check_pid(pid):
             parent = psutil.Process(pid)
             for child in parent.children(recursive=True):
@@ -156,14 +158,21 @@ class TasksManager(TasksManager_proto):
             a_task.final_state = data['result']
 
             # If PID no longer exists:
-            if not self.check_pid(pid) and a_task.status == 'running' and a_task.final_state == '?':
-                # Looks like the process has been killed before reaching the end of the execution
-                # So that we don't have the final state
-                a_task.status = 'cancelled'
+            if not self.check_pid(pid):
+                if a_task.status == 'running' and a_task.final_state == '?':
+                    # Looks like the process has been killed before reaching the end of the execution
+                    # So that we don't have the final state
+                    a_task.status = 'cancelled'
 
-            # But if PID exists, it could be zombie:
+            # But if PID exists, it could be a zombie:
             elif self.check_pid(pid) and psutil.Process(pid).status() == psutil.STATUS_ZOMBIE:
-                a_task.status = 'cancelled'
+                if a_task.final_state in ['success', 'failed']:
+                    # it was zombie, but went through the end of the job (because we have a final_state),
+                    # so, we rescue this status:
+                    a_task.status = 'done'
+                else:
+                    # this is really a zombie job that didn't go through the end before being killed:
+                    a_task.status = 'cancelled'
 
             # Update db
             self.db_session.commit()

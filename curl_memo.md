@@ -1,3 +1,5 @@
+# One Job management:
+
 ## Create new job
 
 ```bash
@@ -22,6 +24,14 @@ curl -X 'GET' \
 ## Cancel running job:
 ```bash
 curl -X 'DELETE' \
-  'http://127.0.0.1:5000/api/1/tasks/36' \
+  'http://127.0.0.1:5000/api/1/tasks/58' \
+  -H 'accept: application/json'
+```
+
+# Jobs collection
+
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/tasks/' \
   -H 'accept: application/json'
 ```

@@ -53,6 +53,6 @@ class Task(Resource):
     @api.response(204, 'Task cancelled')
     @api.marshal_with(task, code=204)
     def delete(self, id):
-        """Delete is for cancelling a task given its identifier"""
+        """Delete a task is for cancelling/killing jobs associated with a task"""
         T.cancel(id)
         return self.get(id), 204
