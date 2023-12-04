@@ -43,22 +43,18 @@ def simulations():
     if 'launch' in request.form:
 
         # Locate user
-        user = Users.query.filter_by(username=str(current_user)).first()
+        # user = Users.query.filter_by(username=str(current_user)).first()
 
         # Read form data
         label = request.form['label']
         nfloats = request.form['nb_floats']
 
         # Submit new simulation:
-        params = {'username': user.username,
+        payload = {'user_id': current_user.get_id(),
                   'label': label,
                   'nfloats': nfloats}
-        # task = Tasks(**params)
-        # db.session.add(task)
-        # db.session.commit()
-        # dbs = Session(db)
-        # with app.app_context():
-        TasksManager(db.session).create(params)
+        print("Submitted new task from webapp with", payload)
+        TasksManager(db.session).create(payload)
 
         return render_template('simulations/launcher.html',
                                form=SimulationForm(request.form),

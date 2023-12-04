@@ -4,19 +4,33 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from flask_login import UserMixin
+from typing import List
+
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import relationship
 
 from apps import db, login_manager
-
 from apps.authentication.util import hash_pass
+
 
 class Users(db.Model, UserMixin):
 
-    __tablename__ = 'Users'
+    __tablename__ = 'Users_table'
 
-    id = db.Column(db.Integer, primary_key=True)
+    # id = db.Column(db.Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     username = db.Column(db.String(64), unique=True)
     email = db.Column(db.String(64), unique=True)
     password = db.Column(db.LargeBinary)
+
+    # id: Mapped[int] = mapped_column(primary_key=True)
+    # children: Mapped[List["Child"]] = relationship(back_populates="parent")
+    tasks: Mapped[List["Tasks"]] = relationship(back_populates="user")
+
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():

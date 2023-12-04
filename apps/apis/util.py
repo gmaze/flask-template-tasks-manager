@@ -20,6 +20,7 @@ from sqlalchemy.orm.scoping import scoped_session
 
 from apps.apis.models import Tasks as dbTasks
 from apps.application import read_data_for_pid
+from apps.authentication.models import Users
 
 
 BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -45,19 +46,16 @@ class TasksManager_proto:
     def get(self, id) -> dbTasks:
         a_task = dbTasks.query.filter_by(id=id).first()
         if a_task:
+            a_user = Users.query.filter_by(id=a_task.user_id).first()
+            a_task.username = a_user.username
             self.update_tasks_status(a_task)
             return a_task
         else:
             abort(404, "Task {} doesn't exist".format(id))
 
     def _register(self, data) -> dbTasks:
-        if 'username' not in data:
-            abort(403, "You must be authenticated to create a new task")
-
-        params = {'label': None, 'nfloats': 1000, 'status': 'queue'}
-        for key in ['username', 'label', 'nfloats']:
-            if key in data:
-                params[key] = data[key]
+        default_data = {'label': None, 'nfloats': 1000, 'status': 'queue'}
+        params = {**default_data, **data}
 
         a_task = dbTasks(**params)
         self.db_session.add(a_task)

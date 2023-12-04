@@ -8,7 +8,7 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-  "username": "",
+  "user_id": 12,
   "label": "",
   "nfloats": 12000
 }'

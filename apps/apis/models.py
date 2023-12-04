@@ -11,6 +11,16 @@ from sqlalchemy.orm import Mapped, mapped_column
 from apps import db
 import json
 from datetime import date, datetime
+from typing import List
+
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import relationship
+
+
 
 class TimestampMixin:
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
@@ -19,10 +29,15 @@ class TimestampMixin:
 
 class Tasks(db.Model, TimestampMixin):
 
-    __tablename__ = 'Tasks'
+    __tablename__ = 'Tasks_table'
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64))
+    # id = db.Column(db.Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("Users_table.id"))
+    # username: Mapped[str] = mapped_column(ForeignKey("Users_table.username"))
+    user: Mapped["Users"] = relationship(back_populates="tasks")
+
     label = db.Column(db.String(64))
     nfloats = db.Column(db.Integer)
     status = db.Column(db.String(64))
@@ -42,7 +57,7 @@ class Tasks(db.Model, TimestampMixin):
 
     def __repr__(self):
         summary = ["<Tasks>"]
-        summary.append("Username: %s" % self.username)
+        summary.append("Username: %s" % self.user.username)
         summary.append("Status: %s" % self.status)
         summary.append("PID: %s" % self.pid)
         summary.append("Progress: %s" % self.progress)
