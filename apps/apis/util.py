@@ -231,3 +231,32 @@ class TasksManager(TasksManager_proto):
         # Do something to delete this task
         print("Do something to delete a task")
         pass
+
+
+def unravel_task(this_task: dbTasks) -> dict:
+    """Unravel a Task model instance to a nested dictionary matching the api model response"""
+    task_core = {'id': None, 'created': None, 'updated': None}
+    task_user = {'user_id': None}
+    task_params = {'username': None, 'nfloats': None, 'label': None}
+    task_run = {'status': None, 'progress': None, 'final_state': None}
+
+    for key in task_core.keys():
+        task_core[key] = getattr(this_task, key)
+
+    for key in task_user.keys():
+        task_user[key] = getattr(this_task, key)
+
+    for key in task_params.keys():
+        if key == 'username':
+            task_params[key] = getattr(this_task.user, key)
+        else:
+            task_params[key] = getattr(this_task, key)
+
+    for key in task_run.keys():
+        task_run[key] = getattr(this_task, key)
+
+    task_core['user'] = task_user
+    task_core['params'] = task_params
+    task_core['run'] = task_run
+
+    return task_core

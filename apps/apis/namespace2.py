@@ -2,7 +2,7 @@ from flask import abort
 from flask_restx import Namespace, Resource, fields, Model
 from flask_login import current_user
 from apps import db
-from apps.apis.util import TasksManager
+from apps.apis.util import TasksManager, unravel_task
 
 authorizations = {
     'apikey': {
@@ -14,21 +14,34 @@ authorizations = {
 
 api = Namespace('tasks', description='Tasks', authorizations=authorizations, security='apikey')
 
-task = api.model('Task', {
+task_user = api.model('User', {
+    'user_id': fields.Integer(description='Id of the user who submitted this task'),
+    # 'username': fields.String(description='Login  of the user who submitted this task', default=""),
+    # Quota ?
+})
+
+task_params = api.model("Params", {
+    'username': fields.String(required=True, description='Login  of the user who submitted this task', default=""),
+    'nfloats': fields.Integer(required=True, description='Number of floats', default=1000),
+    'label': fields.String(description='A label for this task', default=""),
+})
+
+task_run = api.model("Run", {
+    'status': fields.String(description='Task processing status', default='queue'),
+    'progress': fields.Float(description='Task progress in percentage'),
+    'final_state': fields.String(description='Task final state [success/failed]', default='?'),
+    # PID ?
+})
+
+task = api.model("Task",{
     'id': fields.Integer(required=True, description='The task identifier'),
-
-    'username': fields.String(required=False, description='Login  of the user who submitted this task', default=""),
-    'user_id': fields.Integer(required=True, description='Id of the user who submitted this task'),
-
     'created': fields.DateTime(description='Task creation timestamp'),
     'updated': fields.DateTime(description='Task last update timestamp'),
 
-    'label': fields.String(required=False, description='A label for this task', default=""),
-    'nfloats': fields.Integer(required=True, description='Number of floats', default=1000),
+    'user': fields.Nested(task_user),
+    'params': fields.Nested(task_params),
+    'run': fields.Nested(task_run),
 
-    'status': fields.String(required=True, description='Task processing status', default='queue'),
-    'progress': fields.Float(description='Task progress in percentage'),
-    'final_state': fields.String(description='Task final state [success/failed]', default='?'),
 })
 
 
@@ -36,15 +49,16 @@ T = TasksManager(db.session)
 
 @api.route('/')
 class TaskList(Resource):
-    
+
     @api.doc('list_tasks')
     @api.marshal_list_with(task)
     def get(self):
         """List all tasks"""
-        return T.tasks
+        # [print(t.to_dict()) for t in T.tasks]
+        return [unravel_task(t) for t in T.tasks]
 
     @api.doc('create_task')
-    @api.expect(task)
+    @api.expect(task_params)
     @api.marshal_with(task, code=201)
     def post(self):
         """Create a new task"""
@@ -53,12 +67,14 @@ class TaskList(Resource):
         if current_user.is_authenticated:
             print(current_user.get_id())
             print("Submitted new task from API with", api.payload)
-            return T.create(api.payload)
         else:
             api.payload['user_id'] = 1
             print("Fix for non-authenticated, Submitted new task from API with", api.payload)
-            return T.create(api.payload)
             # abort(403, "You must be authenticated to create new tasks")
+
+        created = T.create(api.payload)
+        print("Created:", created)
+        return created
 
 
 @api.route('/<int:id>')
@@ -71,9 +87,9 @@ class Task(Resource):
     @api.marshal_with(task)
     def get(self, id):
         """Fetch a task given its identifier"""
-        return T.get(id), 200
+        return unravel_task(T.get(id)), 200
 
-    @api.doc('delete_task')
+    @api.doc('cancel_task')
     @api.response(204, 'Task cancelled')
     @api.marshal_with(task, code=204)
     def delete(self, id):

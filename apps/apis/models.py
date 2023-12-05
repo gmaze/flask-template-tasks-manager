@@ -57,12 +57,12 @@ class Tasks(db.Model, TimestampMixin):
 
     def __repr__(self):
         summary = ["<Tasks>"]
-        summary.append("Username: %s" % self.user.username)
         summary.append("Status: %s" % self.status)
         summary.append("PID: %s" % self.pid)
         summary.append("Progress: %s" % self.progress)
         summary.append("Final state: %s" % self.final_state)
         summary.append("Parameters:")
+        summary.append("\tUsername: %s" % self.user.username)
         summary.append("\tN-floats: %s" % self.nfloats)
         summary.append("\tlabel: %s" % self.label)
         return "\n".join(summary)
@@ -70,7 +70,7 @@ class Tasks(db.Model, TimestampMixin):
 
     def to_dict(self):
         params = {}
-        for k in ['id', 'username', 'label', 'nfloats', 'status', 'created', 'updated', 'pid', 'final_state', 'progress']:
+        for k in ['id', 'user_id', 'label', 'nfloats', 'status', 'created', 'updated', 'pid', 'final_state', 'progress']:
             params[k] = getattr(self, k)
         return params
 
