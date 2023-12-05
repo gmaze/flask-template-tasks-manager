@@ -29,9 +29,9 @@ from apps.authentication.models import Users
 from apps.apis.util import TasksManager
 
 
-print("simulations.routes")
-print(db.session)
-print(type(db.session))
+# print("simulations.routes")
+# print(db.session)
+# print(type(db.session))
 T = TasksManager(db.session)
 
 

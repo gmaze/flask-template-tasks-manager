@@ -55,19 +55,14 @@ class TasksManager_proto:
         else:
             abort(404, "Task {} doesn't exist".format(id))
 
-    # def tasks_by_user_id(self, user_id) -> List[dict]:
-    #     # all_tasks = dbTasks.query.filter_by(user_id=user_id).order_by(dbTasks.id.desc()).all()
-    #     user = Users.query.filter_by(user_id=user_id).first()
-    #     all_tasks = user.tasks
-    #     self.update_tasks_status(all_tasks)
-    #     return [self.to_dict(t) for t in all_tasks]
+    def tasks_by_user_id(self, user_id) -> List[dict]:
+        all_tasks = dbTasks.query.filter_by(user_id=user_id).order_by(dbTasks.id.desc()).all()
+        self.update_tasks_status(all_tasks)
+        return [self.to_dict(t) for t in all_tasks]
 
     def tasks_by_apikey(self, apikey) -> List[dict]:
         user = Users.query.filter_by(apikey=apikey).first()
-        all_tasks = dbTasks.query.filter_by(user_id=user.id).order_by(dbTasks.id.desc()).all()
-        # all_tasks = user.tasks.order_by(dbTasks.id.desc())
-        self.update_tasks_status(all_tasks)
-        return [self.to_dict(t) for t in all_tasks]
+        return self.tasks_by_user_id(user.id)
 
     def _register(self, data) -> dbTasks:
         default_data = {'label': None, 'nfloats': 1000, 'status': 'queue'}
@@ -306,7 +301,7 @@ class APIkey:
     @property
     def user_id(self):
         if self.is_valid:
-            return Users.find_by_api_key(self.key).id
+            return self.user.id
         else:
             abort(401, "Invalid API key")
 

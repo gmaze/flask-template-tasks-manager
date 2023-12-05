@@ -123,6 +123,15 @@
       console.log("Form reset");
     } );
 
+    get_a_cancel_btn = function(runid, disabled){
+        var html = "<button type='button' class='btn btn-outline-danger btn-sm' ";
+        html += " data-vf-action='cancel'";
+        html += " data-vf-runid='"+runid+"'";
+        html += disabled;
+        html += ">Cancel</button>";
+        return html
+    }
+
     html_progress = function(value, vmin=0, vmax=100, color='secondary', txt){
         {#let html = "" + value;#}
         let width = Number(value) * 100 / (vmax-vmin);
@@ -194,7 +203,9 @@
                 {#var html_status = data[i].status + " ";#}
                 html_status += html_progress(progress, 0, 100, color, data[i].run.status);
 
-                var html_actions = "<button type='button' class='btn btn-outline-danger btn-sm' "+cancel_disabled+">Cancel</button>";
+                var html_cancel = get_a_cancel_btn(data[i].id, cancel_disabled);
+
+                var html_actions = html_cancel;
 
                 html += '<tr>'+
                             '<td>' + data[i].id + '</td>' +
@@ -206,6 +217,25 @@
                         '</tr>';
                 }
             $('#tasks_table tbody').html(html);
+
+            $('button[data-vf-action=cancel]').on('click', function(){
+                // Cancel a task:
+                let runid = $(this).data('vf-runid');
+                console.log("Cancelling " + runid);
+                $.ajax({
+                    url: api + "/" + runid,
+                    type: "DELETE",
+                    headers: {'X-API-KEY': APIKEY},
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                    },
+                    error: function (data) {
+                        alert(data);
+                    }
+                })
+
+            })
           }
         })
     };
