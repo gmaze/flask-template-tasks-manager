@@ -34,5 +34,6 @@ curl -X 'DELETE' \
 ```bash
 curl -X 'GET' \
   'http://127.0.0.1:5000/api/1/tasks/' \
+  -H 'X-API-KEY: 4fe2b4e9b0414f82bd2a5a6527c5e2e8' \
   -H 'accept: application/json'
 ```

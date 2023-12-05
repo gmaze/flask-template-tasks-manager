@@ -55,6 +55,20 @@ class TasksManager_proto:
         else:
             abort(404, "Task {} doesn't exist".format(id))
 
+    # def tasks_by_user_id(self, user_id) -> List[dict]:
+    #     # all_tasks = dbTasks.query.filter_by(user_id=user_id).order_by(dbTasks.id.desc()).all()
+    #     user = Users.query.filter_by(user_id=user_id).first()
+    #     all_tasks = user.tasks
+    #     self.update_tasks_status(all_tasks)
+    #     return [self.to_dict(t) for t in all_tasks]
+
+    def tasks_by_apikey(self, apikey) -> List[dict]:
+        user = Users.query.filter_by(apikey=apikey).first()
+        all_tasks = dbTasks.query.filter_by(user_id=user.id).order_by(dbTasks.id.desc()).all()
+        # all_tasks = user.tasks.order_by(dbTasks.id.desc())
+        self.update_tasks_status(all_tasks)
+        return [self.to_dict(t) for t in all_tasks]
+
     def _register(self, data) -> dbTasks:
         default_data = {'label': None, 'nfloats': 1000, 'status': 'queue'}
         params = {**default_data, **data}
@@ -273,8 +287,10 @@ class APIkey:
         if key is None:
             if 'X-Api-Key' in request.headers:
                 self.key = request.headers['X-Api-Key']
+            elif 'apikey' in request.args:
+                self.key = request.headers['apikey']
             else:
-                abort(400, "You must provide a valid API key with the 'X-Api-Key' header parameter of yor request")
+                abort(400, "You must provide a valid API key with the 'X-Api-Key' header parameter in your request")
         else:
             self.key = key
 

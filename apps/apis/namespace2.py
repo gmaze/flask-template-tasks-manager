@@ -22,7 +22,6 @@ task_user = api.model('User', {
 })
 
 task_params = api.model("Params", {
-    # 'username': fields.String(required=True, description='Login  of the user who submitted this task', default=""),
     'nfloats': fields.Integer(required=True, description='Number of floats', default=1000),
     'label': fields.String(description='A label for this task', default=""),
 })
@@ -42,7 +41,6 @@ task = api.model("Task",{
     'user': fields.Nested(task_user),
     'params': fields.Nested(task_params),
     'run': fields.Nested(task_run),
-
 })
 
 T = TasksManager(db.session)
@@ -53,9 +51,11 @@ class TaskList(Resource):
 
     @api.doc('list_tasks')
     @api.marshal_list_with(task)
+    @apikey_required
     def get(self):
         """List all tasks"""
-        return T.tasks
+        # return T.tasks
+        return T.tasks_by_apikey(APIkey().key)
 
     @api.doc('create_task')
     @api.expect(task_params)
@@ -78,6 +78,7 @@ class Task(Resource):
 
     @api.doc('get_task')
     @api.marshal_with(task)
+    @apikey_required
     def get(self, id):
         """Fetch a task given its identifier"""
         return T.get(id), 200

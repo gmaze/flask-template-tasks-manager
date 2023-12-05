@@ -112,7 +112,8 @@
     <script src="/static/assets/js/pages/simulations-launcher.js"></script>
 
     <script>
-    var API =  {{ url_for("api_blueprint.tasks_task_list") | tojson }}
+    var API = {{ url_for("api_blueprint.tasks_task_list") | tojson }};
+    var APIKEY = {{ current_user.apikey | tojson }};
 
     $('button[name=reset]').on('click', function(){
       // Clean-up the form:
@@ -142,6 +143,7 @@
         $.ajax({
           url:api,
           type:"GET",
+          headers: { 'X-API-KEY': APIKEY },
           contentType:"application/json; charset=utf-8",
           dataType:"json",
           success: function(data){
