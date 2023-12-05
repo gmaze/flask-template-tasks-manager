@@ -1,0 +1,65 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User Profile {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+	<!-- [ Main Content ] start -->
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+
+			<!-- [ Main Content ] start -->
+			<div class="row">
+
+				<!-- [ User profile-page ] start -->
+				<div class="col-md-12">
+					<div class="card g-3 col-md-6">
+
+						<div class="card-header">
+							<h5>Your profile details</h5>
+						</div>
+						<div class="card-body">
+
+                            <div class="form-group row">
+                                <label for="staticUsername" class="col-sm-4 col-form-label">Username</label>
+                                <div class="col-sm-8">
+                                  <input type="text" readonly class="form-control-plaintext" id="staticUsername" value="{{ current_user.username }}">
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="staticEmail" class="col-sm-4 col-form-label">Email</label>
+                                <div class="col-sm-8">
+                                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{ current_user.email }}">
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="staticKey" class="col-sm-4 col-form-label">API key</label>
+                                <div class="col-sm-8">
+                                  <input type="text" readonly class="form-control-plaintext" id="staticKey" value="{{ current_user.apikey }}">
+                                </div>
+                            </div>
+
+						</div>
+					</div>
+				</div>
+				<!-- [ User profile-page ] end -->
+
+			</div>
+			<!-- [ Main Content ] end -->
+		</div>
+	</div>
+	<!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+
+
+{% endblock javascripts %}

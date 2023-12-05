@@ -147,37 +147,38 @@
           success: function(data){
             var html = '';
             for(var i = 0; i < data.length; i++){
-                var html_status = data[i].status + " ";
-                var progress = Number(data[i].progress);
+                {#console.log(data[i]);#}
+                var html_status = data[i].run.status + " ";
+                var progress = Number(data[i].run.progress);
                 var color;
                 var cancel_disabled = "";
 
-                if (data[i].status === 'queue') {
+                if (data[i].run.status === 'queue') {
                     {#html_status += "<i class='feather icon-clock'></i>";#}
                     color = 'info';
                     cancel_disabled = "disabled";
 
-                } else if (data[i].status === 'error'){
+                } else if (data[i].run.status === 'error'){
                     {#html_status += "<i class='feather icon-phone-missed'></i>";#}
                     color = 'danger';
                     cancel_disabled = "disabled";
 
-                } else if (data[i].status === 'cancelled'){
+                } else if (data[i].run.status === 'cancelled'){
                     {#html_status += "<i class='feather icon-phone-missed'></i>";#}
                     color = 'warning';
                     cancel_disabled = "disabled";
 
-                } else if (data[i].status === 'running'){
+                } else if (data[i].run.status === 'running'){
                     {#html_status += "<i class='feather icon-phone-call'></i>";#}
                     color = 'primary';
 
-                } else if (data[i].status === 'done'){
+                } else if (data[i].run.status === 'done'){
                     {#html_status += "<i class='feather icon-phone-off'></i>";#}
                     cancel_disabled = "disabled";
-                    if (data[i].final_state === 'success') {
+                    if (data[i].run.final_state === 'success') {
                         color = 'success';
                         html_status += "(success)";
-                    } else if (data[i].final_state === 'failed') {
+                    } else if (data[i].run.final_state === 'failed') {
                         color = 'danger';
                         html_status += "(failed)";
                     }
@@ -189,16 +190,16 @@
                 }
 
                 {#var html_status = data[i].status + " ";#}
-                html_status += html_progress(progress, 0, 100, color, data[i].status);
+                html_status += html_progress(progress, 0, 100, color, data[i].run.status);
 
                 var html_actions = "<button type='button' class='btn btn-outline-danger btn-sm' "+cancel_disabled+">Cancel</button>";
 
                 html += '<tr>'+
                             '<td>' + data[i].id + '</td>' +
-                            '<td>' + data[i].username + '</td>' +
+                            '<td>' + data[i].params.username + '</td>' +
                             '<td>' + html_status + '</td>' +
-                            '<td>' + data[i].nfloats + '</td>' +
-                            '<td>' + data[i].label + '</td>' +
+                            '<td>' + data[i].params.nfloats + '</td>' +
+                            '<td>' + data[i].params.label + '</td>' +
                             '<td>' + html_actions + '</td>' +
                         '</tr>';
                 }

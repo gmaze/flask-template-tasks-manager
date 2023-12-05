@@ -12,25 +12,30 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import relationship
+from sqlalchemy import DateTime
+from datetime import date, datetime
+import uuid
 
 from apps import db, login_manager
 from apps.authentication.util import hash_pass
 
 
-class Users(db.Model, UserMixin):
+class TimestampMixin:
+    created: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class Users(db.Model, UserMixin, TimestampMixin):
 
     __tablename__ = 'Users_table'
 
-    # id = db.Column(db.Integer, primary_key=True)
     id: Mapped[int] = mapped_column(primary_key=True)
     username = db.Column(db.String(64), unique=True)
     email = db.Column(db.String(64), unique=True)
     password = db.Column(db.LargeBinary)
 
-    # id: Mapped[int] = mapped_column(primary_key=True)
-    # children: Mapped[List["Child"]] = relationship(back_populates="parent")
     tasks: Mapped[List["Tasks"]] = relationship(back_populates="user")
-
+    apikey = db.Column(db.String(80))
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
@@ -46,8 +51,22 @@ class Users(db.Model, UserMixin):
 
             setattr(self, property, value)
 
+        self.apikey = uuid.uuid4().hex
+
     def __repr__(self):
-        return str(self.username)
+        summary = ["<Users.%i>" % self.id]
+        summary.append("Created: %s" % self.created)
+        summary.append("Last update: %s" % self.updated)
+        summary.append("Username: %s" % self.username)
+        summary.append("Email: %s" % self.email)
+        summary.append("API key: %s" % self.apikey)
+        summary.append("Tasks ID: %s" % (",".join([str(t.id) for t in self.tasks])))
+        return "\n".join(summary)
+
+    @classmethod
+    def find_by_api_key(self, apikey):
+        return self.query.filter_by(apikey=apikey).first()
+
 
 
 @login_manager.user_loader

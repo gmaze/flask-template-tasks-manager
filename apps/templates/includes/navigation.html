@@ -35,10 +35,14 @@
                             <div class="pro-head">
                                 <i class="feather icon-user"></i>
                                 <span>
-                                    {{ current_user.username }}
+                                    &nbsp; {{ current_user.username }}
                                 </span>
                             </div>
                             <ul class="pro-body">
+                                <li>
+                                    <a href=""
+                                       class="dropdown-item"><i
+                                            class="feather icon-settings"></i> Settings</a></li>
                                 <li>
                                     <a href="{{ url_for('authentication_blueprint.logout') }}" 
                                        class="dropdown-item"><i

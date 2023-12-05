@@ -11,6 +11,8 @@ from threading import Thread
 from subprocess import Popen, PIPE
 from flask_restx.errors import abort
 from flask import current_app as app
+from flask import request
+from functools import wraps
 import json
 import os
 from signal import SIGKILL
@@ -38,18 +40,18 @@ class TasksManager_proto:
         raise NotImplementedError("Not implemented")
 
     @property
-    def tasks(self) -> dbTasks:
+    def tasks(self) -> List[dict]:
         all_tasks = dbTasks.query.order_by(dbTasks.id.desc()).all()
         self.update_tasks_status(all_tasks)
-        return all_tasks
+        return [self.to_dict(t) for t in all_tasks]
 
-    def get(self, id) -> dbTasks:
+    def get(self, id, raw=False) -> dict:
         a_task = dbTasks.query.filter_by(id=id).first()
         if a_task:
             a_user = Users.query.filter_by(id=a_task.user_id).first()
             a_task.username = a_user.username
             self.update_tasks_status(a_task)
-            return a_task
+            return self.to_dict(a_task) if not raw else a_task
         else:
             abort(404, "Task {} doesn't exist".format(id))
 
@@ -69,7 +71,8 @@ class TasksManager_proto:
         """
         raise NotImplementedError("Not implemented")
 
-    def create(self, data: dict) -> dbTasks:
+    def create(self, data: dict) -> dict:
+        print('Create new task with:', data)
         a_task = self._register(data)
         a_task, result = self._launch(a_task)
         if result:
@@ -84,13 +87,13 @@ class TasksManager_proto:
             print("An error occurred when submitting this Task !", a_task)
             raise(result)
 
-        return a_task
+        return self.to_dict(a_task)
 
     @abstractmethod
     def _delete(self, obj: dbTasks):
         raise NotImplementedError("Not implemented")
 
-    def delete(self, id: int) -> dbTasks:
+    def delete(self, id: int) -> dict:
         a_task = self.get(id)
         try:
             self._delete(a_task)
@@ -99,14 +102,14 @@ class TasksManager_proto:
         finally:
             self.db_session.delete(a_task)
             self.db_session.commit()
-        return a_task
+        return self.to_dict(a_task)
 
     @abstractmethod
     def _cancel(self, obj: dbTasks):
         raise NotImplementedError("Not implemented")
 
-    def cancel(self, id: int) -> dbTasks:
-        a_task = self.get(id)
+    def cancel(self, id: int) -> dict:
+        a_task = self.get(id, raw=True)
         try:
             self._cancel(a_task)
             # Update status:
@@ -114,16 +117,10 @@ class TasksManager_proto:
             self.db_session.commit()
         except:
             raise
-        return a_task
+        return self.to_dict(a_task)
 
     def check_pid(self, pid):
         """ Check For the existence of a unix pid. """
-        # try:
-        #     os.kill(pid, 0)
-        # except OSError:
-        #     return False
-        # else:
-        #     return True
         return psutil.pid_exists(pid)
 
     def kill_pid(self, pid):
@@ -136,12 +133,49 @@ class TasksManager_proto:
                 child.kill()
             parent.kill()
 
+    def to_dict(self, obj: dbTasks) -> dict:
+        """Unravel a Task model instance to a nested dictionary matching the api model response"""
+
+        def task2dict(obj) -> dict:
+            task_core = {'id': None, 'created': None, 'updated': None}
+            task_user = {'user_id': None, 'username': None}
+            task_params = {'nfloats': None, 'label': None}
+            task_run = {'status': None, 'progress': None, 'final_state': None}
+
+            for key in task_core.keys():
+                task_core[key] = getattr(obj, key)
+
+            for key in task_user.keys():
+                # task_user[key] = getattr(obj, key)
+                if key == 'username':
+                    task_user[key] = getattr(obj.user, key)
+                else:
+                    task_user[key] = getattr(obj, key)
+
+            for key in task_params.keys():
+                task_params[key] = getattr(obj, key)
+                # if key == 'username':
+                #     task_params[key] = getattr(obj.user, key)
+                # else:
+                #     task_params[key] = getattr(obj, key)
+
+            for key in task_run.keys():
+                task_run[key] = getattr(obj, key)
+
+            task_core['user'] = task_user
+            task_core['params'] = task_params
+            task_core['run'] = task_run
+
+            return task_core
+
+        return task2dict(obj)
+
 
 class TasksManager(TasksManager_proto):
     """Applicative part"""
 
     def update_tasks_status(self, obj: Union[dbTasks, List[dbTasks]]):
-        """This method is executed on each GET request one one or list of tasks objects
+        """This method is executed on each GET request or list of tasks objects
         For this application, will call on the worker `read_data_for_pid` function to read info from log file
         and commit to database
         """
@@ -205,10 +239,10 @@ class TasksManager(TasksManager_proto):
             a_task.pid = p.pid
             self.db_session.commit()
 
-            return (a_task, True)
+            return a_task, True
 
         except Exception as e:
-            return (a_task, e)
+            return a_task, e
 
     def _cancel(self, a_task: dbTasks):
         # Do something to cancel this task
@@ -233,30 +267,40 @@ class TasksManager(TasksManager_proto):
         pass
 
 
-def unravel_task(this_task: dbTasks) -> dict:
-    """Unravel a Task model instance to a nested dictionary matching the api model response"""
-    task_core = {'id': None, 'created': None, 'updated': None}
-    task_user = {'user_id': None}
-    task_params = {'username': None, 'nfloats': None, 'label': None}
-    task_run = {'status': None, 'progress': None, 'final_state': None}
-
-    for key in task_core.keys():
-        task_core[key] = getattr(this_task, key)
-
-    for key in task_user.keys():
-        task_user[key] = getattr(this_task, key)
-
-    for key in task_params.keys():
-        if key == 'username':
-            task_params[key] = getattr(this_task.user, key)
+class APIkey:
+    """API key helper class"""
+    def __init__(self, key=None):
+        if key is None:
+            if 'X-Api-Key' in request.headers:
+                self.key = request.headers['X-Api-Key']
+            else:
+                abort(400, "You must provide a valid API key with the 'X-Api-Key' header parameter of yor request")
         else:
-            task_params[key] = getattr(this_task, key)
+            self.key = key
 
-    for key in task_run.keys():
-        task_run[key] = getattr(this_task, key)
+    @property
+    def is_valid(self):
+        if self.user:
+            return True
 
-    task_core['user'] = task_user
-    task_core['params'] = task_params
-    task_core['run'] = task_run
+    @property
+    def user(self):
+        return Users.find_by_api_key(self.key)
 
-    return task_core
+    @property
+    def user_id(self):
+        if self.is_valid:
+            return Users.find_by_api_key(self.key).id
+        else:
+            abort(401, "Invalid API key")
+
+
+def apikey_required(view_function):
+    """A Decorator ensuring we're passing in a valid APIkey"""
+    @wraps(view_function)
+    def decorated_function(*args, **kwargs):
+        if APIkey().is_valid:
+            return view_function(*args, **kwargs)
+        else:
+            abort(401, "Invalid API key")
+    return decorated_function

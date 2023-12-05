@@ -1,8 +1,8 @@
-from flask import abort
-from flask_restx import Namespace, Resource, fields, Model
-from flask_login import current_user
+from flask_restx import Namespace, Resource, fields
+
 from apps import db
-from apps.apis.util import TasksManager, unravel_task
+from apps.apis.util import TasksManager, apikey_required, APIkey
+
 
 authorizations = {
     'apikey': {
@@ -16,12 +16,12 @@ api = Namespace('tasks', description='Tasks', authorizations=authorizations, sec
 
 task_user = api.model('User', {
     'user_id': fields.Integer(description='Id of the user who submitted this task'),
-    # 'username': fields.String(description='Login  of the user who submitted this task', default=""),
+    'username': fields.String(description='Login of the user who submitted this task'),
     # Quota ?
 })
 
 task_params = api.model("Params", {
-    'username': fields.String(required=True, description='Login  of the user who submitted this task', default=""),
+    # 'username': fields.String(required=True, description='Login  of the user who submitted this task', default=""),
     'nfloats': fields.Integer(required=True, description='Number of floats', default=1000),
     'label': fields.String(description='A label for this task', default=""),
 })
@@ -44,8 +44,8 @@ task = api.model("Task",{
 
 })
 
-
 T = TasksManager(db.session)
+
 
 @api.route('/')
 class TaskList(Resource):
@@ -54,26 +54,18 @@ class TaskList(Resource):
     @api.marshal_list_with(task)
     def get(self):
         """List all tasks"""
-        # [print(t.to_dict()) for t in T.tasks]
-        return [unravel_task(t) for t in T.tasks]
+        return T.tasks
 
     @api.doc('create_task')
     @api.expect(task_params)
     @api.marshal_with(task, code=201)
+    @api.doc(security='apikey')
+    @apikey_required
     def post(self):
         """Create a new task"""
-        print("API Call payload:", api.payload)
-        print(current_user)
-        if current_user.is_authenticated:
-            print(current_user.get_id())
-            print("Submitted new task from API with", api.payload)
-        else:
-            api.payload['user_id'] = 1
-            print("Fix for non-authenticated, Submitted new task from API with", api.payload)
-            # abort(403, "You must be authenticated to create new tasks")
-
+        api.payload['user_id'] = APIkey().user_id
         created = T.create(api.payload)
-        print("Created:", created)
+        print("Created:\n", created)
         return created
 
 
@@ -87,7 +79,7 @@ class Task(Resource):
     @api.marshal_with(task)
     def get(self, id):
         """Fetch a task given its identifier"""
-        return unravel_task(T.get(id)), 200
+        return T.get(id), 200
 
     @api.doc('cancel_task')
     @api.response(204, 'Task cancelled')

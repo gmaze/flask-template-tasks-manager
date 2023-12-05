@@ -40,8 +40,9 @@ class Tasks(db.Model, TimestampMixin):
 
     label = db.Column(db.String(64))
     nfloats = db.Column(db.Integer)
-    status = db.Column(db.String(64))
+
     pid = db.Column(db.Integer)
+    status = db.Column(db.String(64))
     progress = db.Column(db.Float, default=0)
     final_state = db.Column(db.String(64), default='?')
 
@@ -56,15 +57,20 @@ class Tasks(db.Model, TimestampMixin):
             setattr(self, property, value)
 
     def __repr__(self):
-        summary = ["<Tasks>"]
-        summary.append("Status: %s" % self.status)
-        summary.append("PID: %s" % self.pid)
-        summary.append("Progress: %s" % self.progress)
-        summary.append("Final state: %s" % self.final_state)
+        summary = ["<Tasks.%i>" % self.id]
+        summary.append("Created: %s" % self.created)
+        summary.append("Last update: %s" % self.updated)
+        summary.append("User:")
+        summary.append("\t%s" % self.user)
         summary.append("Parameters:")
         summary.append("\tUsername: %s" % self.user.username)
         summary.append("\tN-floats: %s" % self.nfloats)
         summary.append("\tlabel: %s" % self.label)
+        summary.append("Run:")
+        summary.append("\tPID: %s" % self.pid)
+        summary.append("\tStatus: %s" % self.status)
+        summary.append("\tProgress: %s" % self.progress)
+        summary.append("\tFinal state: %s" % self.final_state)
         return "\n".join(summary)
         # return str("%s: %s (%s): %s" % (self.username, self.nfloats, self.status, self.label))
 
