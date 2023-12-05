@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, fields
+from flask import abort
 
 from apps import db
 from apps.apis.util import TasksManager, apikey_required, APIkey
@@ -84,7 +85,13 @@ class Task(Resource):
     @api.doc('cancel_task')
     @api.response(204, 'Task cancelled')
     @api.marshal_with(task, code=204)
+    @apikey_required
     def delete(self, id):
         """Delete a task is for cancelling/killing jobs associated with a task"""
-        T.cancel(id)
+        if T.get(id)['user']['user_id'] != APIkey().user_id:
+            # abort(401, "You can't cancel this task because you don't have enough privileges !")
+            abort(401, "The provided API key must match the one used to create this task in order to cancel it")
+        else:
+            T.cancel(id)
+
         return self.get(id), 204
