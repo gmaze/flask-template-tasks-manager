@@ -1,8 +1,9 @@
 from flask_restx import Namespace, Resource, fields
-from flask import abort
+from flask import abort, Response
 
 from apps import db
 from apps.apis.util import TasksManager, apikey_required, APIkey
+from apps.authentication.models import Users as dbUsers
 
 
 authorizations = {
@@ -65,11 +66,19 @@ class TaskList(Resource):
     @apikey_required
     def post(self):
         """Create a new task"""
-        api.payload['user_id'] = APIkey().user_id
-        created = T.create(api.payload)
-        # print("Created:\n", created)
-        return created
+        user_id = APIkey().user_id
+        api.payload['user_id'] = user_id
 
+        # Check if user quota allows for new tasks to be created:
+        this_user = dbUsers.find_by_id(user_id)
+        if this_user.tasks_desc_to_dict['quota_left'] > 0:
+            created = T.create(api.payload)
+            return created
+        else:
+            # abort(429, "You reached your subscription plan tasks limit.")
+            # resp = Response("Foo bar baz")
+            # resp.headers['Access-Control-Allow-Origin'] = '*'
+            return "You reached your subscription plan tasks limit.", 429, {"Retry-After": this_user.tasks_desc_to_dict['retry-after']}
 
 @api.route('/<int:id>')
 @api.param('id', 'The task identifier')

@@ -13,7 +13,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import relationship
 from sqlalchemy import DateTime
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import uuid
 
 from apps import db, login_manager
@@ -133,14 +133,28 @@ class Users(db.Model, UserMixin, TimestampMixin):
         summary['history'] = [t.id for t in self.tasks]
 
         # Count how many tasks were submitted over the last quota refreshing window:
-        now, count = datetime.utcnow(), 0
+        now, count, count_running, accounted = datetime.utcnow(), 0, 0, {}
         for t in self.tasks:
             age_seconds = (now - t.created).total_seconds()
             if age_seconds <= self.plan.quota_refresh:
+                accounted[count] = t
                 count += 1
+            if t.status == 'running':
+                count_running += 1
+
+        # Compute the retry-after header parameter to return in case quota is reached:
+        if len(accounted) > 0:
+            oldest_accounted = min([t.created for t in accounted.values()])
+            retry_after = timedelta(seconds=self.plan.quota_refresh)-(now-oldest_accounted)
+            retry_after = int(retry_after.total_seconds())
+        else:
+            retry_after = self.plan.quota_refresh
+
         # print("%i tasks over the last %i seconds, and counting..." % (count, self.plan.quota_refresh))
         summary['quota_count'] = count
         summary['quota_left'] = self.plan.quota_tasks - count
+        summary['running'] = count_running
+        summary['retry-after'] = retry_after
         return summary
 
     def to_dict(self):

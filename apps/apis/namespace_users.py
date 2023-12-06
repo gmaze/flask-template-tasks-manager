@@ -33,6 +33,8 @@ tasks = api.model("UserTasks", {
     'history': fields.String(description='List of ever submitted tasks IDs'),
     'quota_count': fields.Integer(description="Number of tasks submitted over the last refreshing time window"),
     'quota_left': fields.Integer(description="How many tasks remaining before refreshing quota"),
+    'running': fields.Integer(description="How many tasks are currently running"),
+    'retry-after': fields.Integer(description=""),
 })
 
 user = api.model("UserProfile", {

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from apps import db
@@ -85,3 +85,8 @@ class Tasks(db.Model, TimestampMixin):
     @classmethod
     def find_by_user_id(self, user_id):
         return self.query.filter_by(user_id=user_id).order_by(self.id.desc()).all()
+
+    def get_oldest_over_period(self, period: int=86400):
+        """Return the oldest task created over the last 'period' in seconds"""
+        stamp = datetime.utcnow() - timedelta(seconds=period)
+        return self.query.filter(self.created >= stamp).all()

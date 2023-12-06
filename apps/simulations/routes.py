@@ -10,6 +10,7 @@ from flask import (
     redirect,
     request,
     url_for,
+    abort,
 )
 from flask import current_app as app
 from flask_login import (
@@ -53,8 +54,21 @@ def simulations():
         payload = {'user_id': current_user.get_id(),
                   'label': label,
                   'nfloats': nfloats}
-        # print("Submitted new task from webapp with", payload)
-        TasksManager(db.session).create(payload)
+
+        # TasksManager(db.session).create(payload)
+
+        # Check if user quota allows for new tasks to be created:
+        this_user = Users.find_by_id(payload['user_id'])
+        if this_user.tasks_desc_to_dict['quota_left'] > 0:
+            TasksManager(db.session).create(payload)
+        else:
+            # return "You reached your subscription plan tasks limit.", 429, {"Retry-After": this_user.tasks_desc_to_dict['retry-after']}
+
+            return render_template('simulations/launcher.html',
+                                   form=SimulationForm(request.form),
+                                   launched=False,
+                                   error="You reached your subscription plan tasks limit ! Please upgrade or wait for %i seconds" % this_user.tasks_desc_to_dict['retry-after']
+                                   )
 
         return render_template('simulations/launcher.html',
                                form=SimulationForm(request.form),
