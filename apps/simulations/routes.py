@@ -53,7 +53,7 @@ def simulations():
         payload = {'user_id': current_user.get_id(),
                   'label': label,
                   'nfloats': nfloats}
-        print("Submitted new task from webapp with", payload)
+        # print("Submitted new task from webapp with", payload)
         TasksManager(db.session).create(payload)
 
         return render_template('simulations/launcher.html',

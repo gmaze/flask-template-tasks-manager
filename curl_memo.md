@@ -6,7 +6,7 @@
 curl -X 'POST' \
   'http://127.0.0.1:5000/api/1/tasks/' \
   -H 'accept: application/json' \
-  -H 'X-API-KEY: 4fe2b4e9b0414f82bd2a5a6527c5e2e8' \
+  -H 'X-API-KEY: 102142ac191e477c96b1c9255ca5a127' \
   -H 'Content-Type: application/json' \
   -d '{
   "nfloats": 12000,
@@ -34,6 +34,6 @@ curl -X 'DELETE' \
 ```bash
 curl -X 'GET' \
   'http://127.0.0.1:5000/api/1/tasks/' \
-  -H 'X-API-KEY: 4fe2b4e9b0414f82bd2a5a6527c5e2e8' \
+  -H 'X-API-KEY: 102142ac191e477c96b1c9255ca5a127' \
   -H 'accept: application/json'
 ```

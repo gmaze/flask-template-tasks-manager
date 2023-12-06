@@ -6,14 +6,10 @@
 # Created by gmaze on 28/11/2023
 
 from abc import abstractmethod
-import time
-from threading import Thread
 from subprocess import Popen, PIPE
 from flask_restx.errors import abort
-from flask import current_app as app
 from flask import request
 from functools import wraps
-import json
 import os
 from signal import SIGKILL
 import psutil
@@ -82,7 +78,7 @@ class TasksManager_proto:
         raise NotImplementedError("Not implemented")
 
     def create(self, data: dict) -> dict:
-        print('Create new task with:', data)
+        # print('Create new task with:', data)
         a_task = self._register(data)
         a_task, result = self._launch(a_task)
         if result:

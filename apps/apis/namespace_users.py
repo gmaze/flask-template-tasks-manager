@@ -17,6 +17,24 @@ authorizations = {
 api = Namespace('users', description='Users', authorizations=authorizations)
 
 
+role = api.model("UserRole", {
+    'label': fields.String(description='Role description'),
+    'level': fields.Integer(description='Role level'),
+})
+
+subscription_plan = api.model("SubscriptionPlan", {
+    'label': fields.String(description='Subscription description'),
+    # 'level': fields.Integer(description='Subscription level'),
+    'quota_tasks': fields.Integer(description="Tasks quota by 'refresh' time frame"),
+    'quota_refresh': fields.Integer(description='Quota refresh time frame in seconds'),
+})
+
+tasks = api.model("UserTasks", {
+    'history': fields.String(description='List of ever submitted tasks IDs'),
+    'quota_count': fields.Integer(description="Number of tasks submitted over the last refreshing time window"),
+    'quota_left': fields.Integer(description="How many tasks remaining before refreshing quota"),
+})
+
 user = api.model("UserProfile", {
     'id': fields.Integer(description='The user identifier'),
     'created': fields.DateTime(description='Creation timestamp'),
@@ -25,8 +43,10 @@ user = api.model("UserProfile", {
     'username': fields.String(description='User name (login)'),
     'email': fields.String(description='User email'),
     'apikey': fields.String(description='APIkey'),
-    'tasks': fields.String(description='List of tasks'),
 
+    'role': fields.Nested(role),
+    'subscription_plan': fields.Nested(subscription_plan),
+    'tasks': fields.Nested(tasks),
 })
 
 

@@ -1,10 +1,3 @@
-#!/bin/env python
-# -*coding: UTF-8 -*-
-#
-# HELP
-#
-# Created by gmaze on 28/11/2023
-
 from datetime import datetime
 from sqlalchemy import DateTime
 from sqlalchemy.orm import Mapped, mapped_column
@@ -19,7 +12,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import relationship
-
+from sqlalchemy.sql import func
 
 
 class TimestampMixin:
@@ -31,11 +24,9 @@ class Tasks(db.Model, TimestampMixin):
 
     __tablename__ = 'Tasks_table'
 
-    # id = db.Column(db.Integer, primary_key=True)
     id: Mapped[int] = mapped_column(primary_key=True)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("Users_table.id"))
-    # username: Mapped[str] = mapped_column(ForeignKey("Users_table.username"))
     user: Mapped["Users"] = relationship(back_populates="tasks")
 
     label = db.Column(db.String(64))

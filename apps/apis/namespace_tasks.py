@@ -33,7 +33,7 @@ task_run = api.model("Run", {
     # PID ?
 })
 
-task = api.model("Task",{
+task = api.model("Task", {
     'id': fields.Integer(required=True, description='The task identifier'),
     'created': fields.DateTime(description='Task creation timestamp'),
     'updated': fields.DateTime(description='Task last update timestamp'),
@@ -67,7 +67,7 @@ class TaskList(Resource):
         """Create a new task"""
         api.payload['user_id'] = APIkey().user_id
         created = T.create(api.payload)
-        print("Created:\n", created)
+        # print("Created:\n", created)
         return created
 
 
