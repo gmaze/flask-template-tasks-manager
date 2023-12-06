@@ -6,8 +6,8 @@
 
 from flask import Blueprint
 from flask_restx import Api
-from .namespace1 import api as ns1
-from .namespace2 import api as ns2
+from .namespace_tasks import api as ns_tasks
+from .namespace_users import api as ns_users
 import logging
 
 
@@ -25,5 +25,6 @@ api = Api(blueprint,
             title='VirtualFleet-Recovery',
             version='1.0',
             description='An API to make VirtualFleet-Recovery simulations')
-# api.add_namespace(ns1)
-api.add_namespace(ns2)
+
+api.add_namespace(ns_tasks)
+api.add_namespace(ns_users)

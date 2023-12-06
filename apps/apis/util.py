@@ -57,11 +57,12 @@ class TasksManager_proto:
 
     def tasks_by_user_id(self, user_id) -> List[dict]:
         all_tasks = dbTasks.query.filter_by(user_id=user_id).order_by(dbTasks.id.desc()).all()
+        # all_tasks = dbTasks.find_by_user_id(user_id=user_id)
         self.update_tasks_status(all_tasks)
         return [self.to_dict(t) for t in all_tasks]
 
     def tasks_by_apikey(self, apikey) -> List[dict]:
-        user = Users.query.filter_by(apikey=apikey).first()
+        user = Users.find_by_api_key(apikey)
         return self.tasks_by_user_id(user.id)
 
     def _register(self, data) -> dbTasks:

@@ -67,6 +67,17 @@ class Users(db.Model, UserMixin, TimestampMixin):
     def find_by_api_key(self, apikey):
         return self.query.filter_by(apikey=apikey).first()
 
+    @classmethod
+    def find_by_id(self, id):
+        return self.query.filter_by(id=id).first()
+
+    def to_dict(self):
+        params = {}
+        for k in ['id', 'created', 'updated', 'username', 'email', 'apikey']:
+            params[k] = getattr(self, k)
+        params['tasks'] = [t.id for t in self.tasks]
+        return params
+
 
 
 @login_manager.user_loader

@@ -13,7 +13,7 @@ authorizations = {
     }
 }
 
-api = Namespace('tasks', description='Tasks', authorizations=authorizations, security='apikey')
+api = Namespace('tasks', description='Tasks', authorizations=authorizations)
 
 task_user = api.model('User', {
     'user_id': fields.Integer(description='Id of the user who submitted this task'),
@@ -51,6 +51,7 @@ class TaskList(Resource):
 
     @api.doc('list_tasks')
     @api.marshal_list_with(task)
+    @api.doc(security='apikey')
     @apikey_required
     def get(self):
         """List all tasks"""
@@ -78,6 +79,7 @@ class Task(Resource):
 
     @api.doc('get_task')
     @api.marshal_with(task)
+    @api.doc(security='apikey')
     @apikey_required
     def get(self, id):
         """Fetch a task given its identifier"""
@@ -86,9 +88,10 @@ class Task(Resource):
     @api.doc('cancel_task')
     @api.response(204, 'Task cancelled')
     @api.marshal_with(task, code=204)
+    @api.doc(security='apikey')
     @apikey_required
     def delete(self, id):
-        """Delete a task is for cancelling/killing jobs associated with a task"""
+        """Cancel/kill jobs associated with a task"""
         if T.get(id)['user']['user_id'] != APIkey().user_id:
             # abort(401, "You can't cancel this task because you don't have enough privileges !")
             abort(401, "The provided API key must match the one used to create this task in order to cancel it")

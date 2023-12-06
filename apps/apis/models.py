@@ -90,3 +90,7 @@ class Tasks(db.Model, TimestampMixin):
     def to_json(self):
         data = self.to_dict()
         return json.dumps(data, default=self._json_serial, ensure_ascii=False)
+
+    @classmethod
+    def find_by_user_id(self, user_id):
+        return self.query.filter_by(user_id=user_id).order_by(self.id.desc()).all()
