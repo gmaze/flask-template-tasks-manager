@@ -19,62 +19,116 @@
 	<div class="pcoded-main-container">
 		<div class="pcoded-content">
 			<!-- [ breadcrumb ] start -->
-			<div class="page-header">
-				<div class="page-block">
-					<div class="row align-items-center">
-						<div class="col-md-12">
-							<div class="page-header-title">
-								<h5 class="m-b-10">Simulations Page</h5>
-							</div>
-							<ul class="breadcrumb">
-								<li class="breadcrumb-item"><a href="/"><i class="feather icon-home"></i></a></li>
-								<li class="breadcrumb-item"><a href="#">Simulations</a></li>
-								<li class="breadcrumb-item"><a href="#">Launcher</a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
+{#			<div class="page-header">#}
+{#				<div class="page-block">#}
+{#					<div class="row align-items-center">#}
+{#						<div class="col-md-12">#}
+{#							<div class="page-header-title">#}
+{#								<h5 class="m-b-10">Simulations Page</h5>#}
+{#							</div>#}
+{#							<ul class="breadcrumb">#}
+{#								<li class="breadcrumb-item"><a href="/"><i class="feather icon-home"></i></a></li>#}
+{#								<li class="breadcrumb-item"><a href="#">Simulations</a></li>#}
+{#								<li class="breadcrumb-item"><a href="#">Launcher</a></li>#}
+{#							</ul>#}
+{#						</div>#}
+{#					</div>#}
+{#				</div>#}
+{#			</div>#}
 			<!-- [ breadcrumb ] end -->
 
 			<!-- [ Main Content ] start -->
-			<div class="row">
-
+            <div class="row">
 				<!-- [ Create a new simulation-page ] start -->
-				<div class="col-md-12">
-					<div class="card g-3 col-md-6">
-
-						<div class="card-header">
-							<h5>Create a new simulation</h5>
-						</div>
-						<div class="card-body">
-
+                <div class="col-md-12 col-xl-6">
+                    <div class="card">
+                        <div class="card-header"> <h5>Create a new simulation</h5> </div>
+                        <div class="card-body" style="min-height: 245px;">
                             <form method="post" action="" id="launch_form">
-
-								{{ form.hidden_tag() }}
-
-								<div class="input-group mb-4">
-									<span class="input-group-text"><i class="feather icon-type"></i></span>
-									{{ form.label(placeholder="Simulation Label", class="form-control") }}
-								</div>
-
-                                  <div class="input-group mb-4">
+                                {{ form.hidden_tag() }}
+                                <div class="input-group mb-4">
+                                    <span class="input-group-text"><i class="feather icon-type"></i></span>
+                                    {{ form.label(placeholder="Simulation Label", class="form-control") }}
+                                </div>
+                                <div class="input-group mb-4">
                                     <span class="input-group-text"><i class="feather icon-life-buoy"></i>&ensp;Number of virtual floats</span>
                                     <span class="form-control" id="nfloats_value"></span>
-									{{ form.nb_floats(class="form-range", min="100", max="4000", step="10") }}
-                                  </div>
-
-								<button type="submit" name="launch" class="btn btn-block btn-primary mt-2 mb-4">Launch !</button>
-								<button type="reset" name="reset" class="btn btn-block btn-danger mt-2 mb-4">Reset</button>
+                                    {{ form.nb_floats(class="form-range", min="100", max="4000", step="10") }}
+                                </div>
+                                <button type="submit" name="launch" class="btn btn-block btn-primary mt-2 mb-4">Launch !</button>
+                                <button type="reset" name="reset" class="btn btn-block btn-danger mt-2 mb-4">Reset</button>
                                 {{ error }}
-							</form>
-
-						</div>
-					</div>
-				</div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 				<!-- [ Create a new simulation-page ] end -->
 
-				<!-- [ List of user simulations-page ] start -->
+				<!-- [ simulations counters ] start -->
+                <div class="col-md-12 col-xl-6">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="card">
+                                <div class="card-body bg-patern">
+                                    <div class="row">
+                                        <div class="col-auto">
+                                            <span>Simulations</span>
+                                        </div>
+                                        <div class="col text-end">
+                                            <h2 class="mb-0" id="tasks_count_total"></h2>
+                                            <span class="text-primary" id="tasks_count_total_head"></span>
+                                        </div>
+                                    </div>
+                                    <div id="customer-chart1"></div>
+                                    <div class="row mt-3">
+                                        <div class="col">
+                                            <h4 class="m-0 text-success" id="tasks_count_success"></h4>
+                                            <span class="ms-3 text-success">Success</span>
+                                        </div>
+                                        <div class="col">
+                                            <h4 class="m-0 text-danger" id="tasks_count_failed"></h4>
+                                            <span class="ms-3 text-danger">Fails</span>
+                                        </div>
+                                        <div class="col">
+                                            <h4 class="m-0 text-c-yellow" id="tasks_count_cancelled"></h4>
+                                            <span class="ms-3 text-c-yellow">Cancelled</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card bg-behance text-white">
+{#                            <div class="card bg-primary text-white">#}
+                                <div class="card-body bg-patern-white">
+                                    <div class="row">
+                                        <div class="col-auto">
+                                            <span>Quota</span>
+                                        </div>
+                                        <div class="col text-end">
+                                            <h2 class="mb-0 text-white" id="quota_count_left_head"></h2>
+                                            <span class="text-white" id="quota_count_total_head"><i class="feather icon-sliders ms-1"></i></span>
+                                        </div>
+                                    </div>
+                                    <div id="customer-chart2"></div>
+                                    <div class="row mt-3">
+                                        <div class="col">
+                                            <h4 class="m-0 text-white" id="quota_count_left"><i class="fas fa-circle f-10 m-r-5 text-success"></i></h4>
+                                            <span class="ms-3">Remaining</span>
+                                        </div>
+                                        <div class="col">
+                                            <h4 class="m-0 text-black" id="quota_count_done"><i class="fas fa-circle f-10 m-r-5 text-black"></i></h4>
+                                            <span class="ms-3 text-black">Consumed</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				<!-- [ simulations counters ] end -->
+
+                <!-- [ List of user simulations-page ] start -->
 				<div class="col-md-12">
 					<div class="card table-card">
 						<div class="card-header">
@@ -104,7 +158,7 @@
                 </div>
                 <!-- [ List of user simulations-page ] end -->
 
-			</div>
+            </div>
 			<!-- [ Main Content ] end -->
 		</div>
 	</div>
@@ -116,147 +170,34 @@
 {% block javascripts %}
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-
+    <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
     <script src="/static/assets/js/pages/simulations-launcher.js"></script>
 
     <script>
-    var API = {{ url_for("api_blueprint.tasks_task_list") | tojson }};
+    var API1 = {{ url_for("api_blueprint.tasks_task_list") | tojson }};
+    var API2 = {{ url_for("api_blueprint.users_user_2") | tojson }};
     var APIKEY = {{ current_user.apikey | tojson }};
 
-    $('button[name=reset]').on('click', function(){
-      // Clean-up the form:
-      $('input[name=label]').val("");
-      $('input[name=nb_floats]').val();
-      $('#nfloats_value').text($('input[name=nb_floats]').val());
-      console.log("Form reset");
-    } );
-
-    get_a_cancel_btn = function(runid, disabled){
-        var html = "<button type='button' class='btn btn-outline-danger btn-sm' ";
-        html += " data-vf-action='cancel'";
-        html += " data-vf-runid='"+runid+"'";
-        html += disabled;
-        html += ">Cancel</button>";
-        return html
-    }
-
-    html_progress = function(value, vmin=0, vmax=100, color='secondary', txt){
-        {#let html = "" + value;#}
-        let width = Number(value) * 100 / (vmax-vmin);
-        width = width.toFixed(0);
-        {#console.log(width);#}
-        let html = "";
-        {#html += "<div class='progress mt-1' style='height:6px;'>";#}
-        html += "<div class='progress mt-1'>";
-        html += "<div class='progress-bar bg-" + color + " rounded' role='progressbar' style='width: "+width+"%;'";
-        html += " aria-valuenow='"+value+"'";
-        html += " aria-valuemin='"+vmin+"' ";
-        html += "aria-valuemax='"+vmax+"'>";
-        html += width + "%</div></div>";
-        return html
-    }
-
-    list_tasks = function(api) {
-        $.ajax({
-          url:api,
-          type:"GET",
-          headers: { 'X-API-KEY': APIKEY },
-          contentType:"application/json; charset=utf-8",
-          dataType:"json",
-          success: function(data){
-            var html = '';
-            for(var i = 0; i < data.length; i++){
-                {#console.log(data[i]);#}
-                var html_status = data[i].run.status + " ";
-                var progress = Number(data[i].run.progress);
-                var color;
-                var cancel_disabled = "";
-
-                if (data[i].run.status === 'queue') {
-                    {#html_status += "<i class='feather icon-clock'></i>";#}
-                    color = 'info';
-                    cancel_disabled = "disabled";
-
-                } else if (data[i].run.status === 'error'){
-                    {#html_status += "<i class='feather icon-phone-missed'></i>";#}
-                    color = 'danger';
-                    cancel_disabled = "disabled";
-
-                } else if (data[i].run.status === 'cancelled'){
-                    {#html_status += "<i class='feather icon-phone-missed'></i>";#}
-                    color = 'warning';
-                    cancel_disabled = "disabled";
-
-                } else if (data[i].run.status === 'running'){
-                    {#html_status += "<i class='feather icon-phone-call'></i>";#}
-                    color = 'primary';
-
-                } else if (data[i].run.status === 'done'){
-                    {#html_status += "<i class='feather icon-phone-off'></i>";#}
-                    cancel_disabled = "disabled";
-                    if (data[i].run.final_state === 'success') {
-                        color = 'success';
-                        html_status += "(success)";
-                    } else if (data[i].run.final_state === 'failed') {
-                        color = 'danger';
-                        html_status += "(failed)";
-                    }
-                    progress = 100;
-
-                } else {
-                    {#html_status += "<i class='feather icon-alert-circle'></i>";#}
-                    color = 'danger';
-                }
-
-                {#var html_status = data[i].status + " ";#}
-                html_status += html_progress(progress, 0, 100, color, data[i].run.status);
-
-                var html_cancel = get_a_cancel_btn(data[i].id, cancel_disabled);
-
-                var html_actions = html_cancel;
-
-                html += '<tr>'+
-                            '<td>' + data[i].id + '</td>' +
-                            '<td>' + data[i].user.username + '</td>' +
-                            '<td>' + html_status + '</td>' +
-                            '<td>' + data[i].params.nfloats + '</td>' +
-                            '<td>' + data[i].params.label + '</td>' +
-                            '<td>' + html_actions + '</td>' +
-                        '</tr>';
-                }
-            $('#tasks_table tbody').html(html);
-
-            $('button[data-vf-action=cancel]').on('click', function(){
-                // Cancel a task:
-                let runid = $(this).data('vf-runid');
-                console.log("Cancelling " + runid);
-                $.ajax({
-                    url: api + "/" + runid,
-                    type: "DELETE",
-                    headers: {'X-API-KEY': APIKEY},
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (data) {
-                    },
-                    error: function (data) {
-                        alert(data);
-                    }
-                })
-
-            })
-          },
-
-        })
-    };
-
     var RefreshTasksList = window.setInterval(function(){
-        list_tasks(API);
-        console.log('Refreshing tasks list...');
+        list_tasks(API1);
+        //fill_in_tasks_card(API2, donut1);
+        //fill_in_quota_card(API2, donut2);
+        fill_in_user_cards(API2, donut1, donut2);
     }, 2000);
 
+    var donut1;
+    var donut2;
     $( document ).ready(function() {
         $('button[name=reset]').trigger('click');
-        list_tasks(API);
+        list_tasks(API1);
+
+        donut1 = init_donut("customer-chart1", ['Fails', 'Success', 'Cancelled'], ["#FF5370", "#2ed8b6", "#FFB64D"]);
+        //fill_in_tasks_card(API2, donut1);
+
+        donut2 = init_donut("customer-chart2", ['Consumed', 'Remaining'], ["#000", "#EEE"], 0);
+        //fill_in_quota_card(API2, donut2);
+
+        fill_in_user_cards(API2, donut1, donut2);
     })
 
 

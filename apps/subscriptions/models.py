@@ -12,7 +12,7 @@ class SubscriptionPlans(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     label = db.Column(db.String(64), unique=True)
-    level = db.Column(db.Integer, unique=True)
+    level = db.Column(db.Integer)
     quota_tasks = db.Column(db.Integer)
     quota_refresh = db.Column(db.Integer)
 
@@ -53,3 +53,7 @@ class SubscriptionPlans(db.Model):
     def to_json(self):
         data = self.to_dict()
         return json.dumps(data, default=self._json_serial, ensure_ascii=False)
+
+    @classmethod
+    def find_by_label(self, label):
+        return self.query.filter_by(label=label).first()

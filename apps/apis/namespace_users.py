@@ -29,11 +29,19 @@ subscription_plan = api.model("SubscriptionPlan", {
     'quota_refresh': fields.Integer(description='Quota refresh time frame in seconds'),
 })
 
+
+result = api.model("TaskResult", {
+    'success': fields.Integer(description='Task achieved with success'),
+    'failed': fields.Integer(description='Task failed to achieve'),
+    'cancelled': fields.Integer(description='Task cancelled'),
+})
+
 tasks = api.model("UserTasks", {
     'history': fields.String(description='List of ever submitted tasks IDs'),
     'quota_count': fields.Integer(description="Number of tasks submitted over the last refreshing time window"),
     'quota_left': fields.Integer(description="How many tasks remaining before refreshing quota"),
     'running': fields.Integer(description="How many tasks are currently running"),
+    'results': fields.Nested(result),
     'retry-after': fields.Integer(description=""),
 })
 
@@ -52,15 +60,18 @@ user = api.model("UserProfile", {
 })
 
 
-@api.route('/')
+@api.route('/all')
 class UserList(Resource):
 
     @api.doc('list_users')
     @api.marshal_list_with(user)
-    # @api.doc(security='apikey')
-    # @apikey_required
+    @api.doc(security='apikey')
+    @apikey_required
     def get(self):
-        """List all Users"""
+        """Fetch all users at once"""
+        # One user is trying to access all user profiles
+        # todo implement privilege control
+
         # Get the list of users:
         DBresults = dbUsers.query.order_by(dbUsers.id.desc()).all()
 
@@ -72,19 +83,26 @@ class UserList(Resource):
         return output
 
 
-
-@api.route('/<int:id>')
+@api.route('/', defaults={'id': None}, methods=['GET'])
+@api.route('/<int:id>', methods=['GET'])
 @api.param('id', 'The user identifier')
-@api.response(404, 'User not found')
 class User(Resource):
 
     @api.doc('get_user')
     @api.marshal_with(user)
-    # @api.doc(security='apikey')
-    # @apikey_required
-    def get(self, id):
-        """Fetch one user data given its identifier"""
-        u = dbUsers.find_by_id(id)
+    @api.doc(security='apikey')
+    @apikey_required
+    def get(self, id: int=None):
+        """Fetch one user data, given its identifier or APIkey"""
+        if id is None:
+            user_id = APIkey().user_id
+        else:
+            # One user is trying to access another user profile
+            # todo implement privilege control
+            user_id = id
+
+        u = dbUsers.find_by_id(user_id)
+
         if u:
             return u.to_dict(), 200
         else:

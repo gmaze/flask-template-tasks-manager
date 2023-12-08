@@ -67,23 +67,34 @@ def insert_in_database(app):
         """
         try:
             from apps.authentication.models import UsersRole
-            db.session.add(UsersRole(label='Admin', level=100))
-            db.session.add(UsersRole(label='Supervisor', level=50))
-            db.session.add(UsersRole(label='User', level=0))
-            db.session.commit()
+            if UsersRole.query.count() == 0:
+                db.session.add(UsersRole(label='Admin', level=100))
+                db.session.add(UsersRole(label='Supervisor', level=50))
+                db.session.add(UsersRole(label='User', level=0))
+                db.session.commit()
 
             from apps.subscriptions.models import SubscriptionPlans
-            db.session.add(SubscriptionPlans(label='Gold', level=100, quota_tasks=1000, quota_refresh=86400))
-            db.session.add(SubscriptionPlans(label='Silver', level=75, quota_tasks=500, quota_refresh=86400))
-            db.session.add(SubscriptionPlans(label='Bronze', level=50, quota_tasks=250, quota_refresh=86400))
-            db.session.add(SubscriptionPlans(label='Free', level=0, quota_tasks=10, quota_refresh=86400))
-            db.session.commit()
+            if SubscriptionPlans.query.count() == 0:
+                db.session.add(SubscriptionPlans(label='Gold', level=100, quota_tasks=1000, quota_refresh=86400))
+                db.session.add(SubscriptionPlans(label='Silver', level=75, quota_tasks=500, quota_refresh=86400))
+                db.session.add(SubscriptionPlans(label='Bronze', level=50, quota_tasks=250, quota_refresh=86400))
+                db.session.add(SubscriptionPlans(label='Free', level=0, quota_tasks=10, quota_refresh=86400))
+                db.session.commit()
 
             from apps.authentication.models import Users
-            db.session.add(Users(username='gmaze',
-                                 email='g@g.com',
-                                 password='pl'))
-            db.session.commit()
+            if Users.query.count() == 0:
+                db.session.add(Users(username='admin',
+                                     email='a@dm.in',
+                                     password='pl',
+                                     role_id=UsersRole.find_by_label(label='Admin').id))
+                db.session.add(Users(username='pro',
+                                     email='p@r.o',
+                                     password='pl',
+                                     plan_id=SubscriptionPlans.find_by_label(label='Gold').id))
+                db.session.add(Users(username='student',
+                                     email='st@ud.ent',
+                                     password='pl'))
+                db.session.commit()
 
         except Exception as e:
             print('> Error: DBMS Exception: ' + str(e))

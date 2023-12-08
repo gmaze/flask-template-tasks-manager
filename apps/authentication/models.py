@@ -7,10 +7,8 @@ from flask_login import UserMixin
 from typing import List
 
 from sqlalchemy import ForeignKey
-from sqlalchemy import Integer
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import relationship
 from sqlalchemy import DateTime
 from datetime import date, datetime, timedelta
@@ -49,6 +47,11 @@ class UsersRole(db.Model):
     def to_dict(self):
         return {'label': self.label, 'level': self.level}
 
+    @classmethod
+    def find_by_label(self, label):
+        return self.query.filter_by(label=label).first()
+
+
 
 class TimestampMixin:
     created: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
@@ -71,6 +74,8 @@ class Users(db.Model, UserMixin, TimestampMixin):
     tasks: Mapped[List["Tasks"]] = relationship(back_populates="user")
 
     def __init__(self, **kwargs):
+        plan_set = False
+        role_set = False
         for property, value in kwargs.items():
             # depending on whether value is an iterable or not, we must
             # unpack its value (when **kwargs is request.form, some values
@@ -84,13 +89,21 @@ class Users(db.Model, UserMixin, TimestampMixin):
 
             setattr(self, property, value)
 
+            if property == 'plan_id':
+                plan_set = True
+
+            if property == 'role_id':
+                role_set = True
+
         self.apikey = uuid.uuid4().hex
 
-        default_role_user = db.session.query(UsersRole).filter_by(level=0).first()
-        self.role_id = default_role_user.id
+        if not role_set:
+            default_role_user = db.session.query(UsersRole).filter_by(level=0).first()
+            self.role_id = default_role_user.id
 
-        default_plan = db.session.query(SubscriptionPlans).filter_by(level=0).first()
-        self.plan_id = default_plan.id
+        if not plan_set:
+            default_plan = db.session.query(SubscriptionPlans).filter_by(level=0).first()
+            self.plan_id = default_plan.id
 
     def __repr__(self):
         summary = ["<Users.%i>" % self.id]
@@ -133,7 +146,7 @@ class Users(db.Model, UserMixin, TimestampMixin):
         summary['history'] = [t.id for t in self.tasks]
 
         # Count how many tasks were submitted over the last quota refreshing window:
-        now, count, count_running, accounted = datetime.utcnow(), 0, 0, {}
+        now, count, count_running, accounted, results = datetime.utcnow(), 0, 0, {}, {'success': 0, 'failed': 0, 'cancelled': 0}
         for t in self.tasks:
             age_seconds = (now - t.created).total_seconds()
             if age_seconds <= self.plan.quota_refresh:
@@ -141,6 +154,13 @@ class Users(db.Model, UserMixin, TimestampMixin):
                 count += 1
             if t.status == 'running':
                 count_running += 1
+
+            if t.final_state == 'success':
+                results['success'] += 1
+            elif t.final_state == 'failed':
+                results['failed'] += 1
+            else:
+                results['cancelled'] += 1
 
         # Compute the retry-after header parameter to return in case quota is reached:
         if len(accounted) > 0:
@@ -154,6 +174,7 @@ class Users(db.Model, UserMixin, TimestampMixin):
         summary['quota_count'] = count
         summary['quota_left'] = self.plan.quota_tasks - count
         summary['running'] = count_running
+        summary['results'] = results
         summary['retry-after'] = retry_after
         return summary
 
