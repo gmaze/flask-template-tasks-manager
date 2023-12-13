@@ -126,6 +126,14 @@ class Users(db.Model, UserMixin, TimestampMixin):
     def find_by_id(self, id):
         return self.query.filter_by(id=id).first()
 
+    @classmethod
+    def find_by_email(self, email):
+        return self.query.filter_by(email=email).first()
+
+    @classmethod
+    def find_by_username(self, username):
+        return self.query.filter_by(username=username).first()
+
     @property
     def role(self):
         return db.session.query(UsersRole).filter_by(id=self.role_id).first()
@@ -159,7 +167,7 @@ class Users(db.Model, UserMixin, TimestampMixin):
                 results['success'] += 1
             elif t.final_state == 'failed':
                 results['failed'] += 1
-            else:
+            elif t.status != 'running':
                 results['cancelled'] += 1
 
         # Compute the retry-after header parameter to return in case quota is reached:

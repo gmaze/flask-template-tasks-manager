@@ -1,11 +1,13 @@
 from apps import db
 import json
 from datetime import date, datetime
-
+from typing import List
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
+from dataclasses import dataclass
 
 
+@dataclass
 class SubscriptionPlans(db.Model):
 
     __tablename__ = 'SubscriptionPlans_table'
@@ -15,7 +17,6 @@ class SubscriptionPlans(db.Model):
     level = db.Column(db.Integer)
     quota_tasks = db.Column(db.Integer)
     quota_refresh = db.Column(db.Integer)
-
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
@@ -57,3 +58,11 @@ class SubscriptionPlans(db.Model):
     @classmethod
     def find_by_label(self, label):
         return self.query.filter_by(label=label).first()
+
+    @classmethod
+    def find_by_id(self, id):
+        return self.query.filter_by(id=id).first()
+
+    def plans(self) -> List[dict]:
+        all_plans = self.query.order_by(self.level).all()
+        return [self.to_dict(p) for p in all_plans]

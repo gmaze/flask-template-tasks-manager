@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from apps.home import blueprint
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 
@@ -13,6 +13,8 @@ from jinja2 import TemplateNotFound
 @login_required
 def index():
     return render_template('home/index.html', segment='index')
+    # print(current_user)
+    # return redirect(url_for('home_blueprint.subscription_plans'))
 
 
 @blueprint.route('/settings')
@@ -21,10 +23,9 @@ def user_profile():
     return render_template('home/account.html', segment='index')
 
 
-@blueprint.route('/index_full')
-@login_required
-def index_full():
-    return render_template('home/index_eg.html', segment='index')
+@blueprint.route('/subscription-plans')
+def subscription_plans():
+    return render_template('home/subscription-plans.html', segment='index')
 
 
 @blueprint.route('/<template>')

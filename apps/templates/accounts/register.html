@@ -18,49 +18,84 @@
 
 							<h4 class="mb-3 f-w-400">Sign UP</h4>
 
-							<span class="mb-0 text-muted">
-								{% if msg %}
-									<span class="text-danger">
-										{{ msg | safe }}
-									</span>
-								{% else %}
-									Add your credentials
-								{% endif %} 
-							</span>
-							
-							<br /><br />
+                            <form role="form" method="post" action="">
+                                {{ form.hidden_tag() }}
 
-							{% if success %}
-								<p class="mb-2">
-									<a class="btn btn-primary btn-block mt-2 mb-4" href="{{ url_for('authentication_blueprint.login') }}" class="f-w-400">Sign IN</a>
-								</p>
-							{% else %}
+                                <div class="row">
 
-								<form role="form" method="post" action="">
+                                    <div class="col-sm">
 
-									{{ form.hidden_tag() }}
+                                        <span class="mb-0 text-muted">
+                                            {% if not success %}
+                                            <ul class="text-danger">
+                                                {% for error in errors %}
+                                                <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                            {% if msg %}
+                                                <span class="text-danger">
+                                                    {{ msg | safe }}
+                                                </span>
+                                            {% else %}
+                                                Add your credentials:
+                                            {% endif %}
+                                        </span>
+                                        <br /><br />
 
-									<div class="input-group mb-3">
-										<span class="input-group-text"><i class="feather icon-user"></i></span>
-										{{ form.username(placeholder="Username", class="form-control") }}
-									</div>
-									<div class="input-group mb-3">
-										<span class="input-group-text"><i class="feather icon-mail"></i></span>
-										{{ form.email(placeholder="Email", class="input form-control", type="email") }}
-									</div>
-									<div class="input-group mb-4">
-										<span class="input-group-text"><i class="feather icon-lock"></i></span>
-										{{ form.password(placeholder="Password", class="form-control", type="password") }}
-									</div>
+                                        {% if success %}
+                                        <p class="mb-2">
+                                            You can now sign in with your account: <br /><a class="btn btn-primary btn-block mt-2 mb-4 text-white" href="{{ url_for('authentication_blueprint.login') }}" class="f-w-400">Sign IN</a>
+                                        </p>
+                                        {% else %}
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text"><i class="feather icon-user"></i></span>
+                                            {{ form.username(placeholder="Username", class="form-control") }}
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <span class="input-group-text"><i class="feather icon-mail"></i></span>
+                                            {{ form.email(placeholder="Email", class="input form-control", type="email") }}
+                                        </div>
+                                        <div class="input-group mb-4">
+                                            <span class="input-group-text"><i class="feather icon-lock"></i></span>
+                                            {{ form.password(placeholder="Password", class="form-control", type="password") }}
+                                        </div>
+        							    {% endif %}
 
-									<button type="submit" name="register" class="btn btn-primary btn-block mt-2 mb-4">Sign UP</button>
-									<p class="mb-2">
-										Already have an account? <a href="{{ url_for('authentication_blueprint.login') }}" class="f-w-400">Sign IN</a>
-									</p>
-								
-								</form>
+                                    </div>
 
-							{% endif %}	
+                                    {% if list_plans %}
+                                    <div class="col-sm">
+                                        <span class="mb-0 text-muted">
+                                            and choose a <br />subscription plan:
+                                        </span>
+                                        <br /><br />
+                                        <div class="btn-group-vertical" role="group" data-toggle="buttons" aria-label="Subscription plans" >
+                                            {% for plan in list_plans %}
+                                                {%  if plan.level <= 0 %}
+                                                <button type="button" class="btn btn-outline-secondary planBtn" aria-pressed="false" autocomplete="off" id="planBtn_{{ plan.id }}">
+                                                {%  elif plan.level <= 1 %}
+                                                <button type="button" class="btn btn-outline-success planBtn" aria-pressed="false" autocomplete="off" id="planBtn_{{ plan.id }}">
+                                                {%  elif plan.level <= 2 %}
+                                                <button type="button" class="btn btn-outline-info planBtn"  aria-pressed="false" autocomplete="off" id="planBtn_{{ plan.id }}">
+                                                {%  else %}
+                                                <button type="button" class="btn btn-outline-light planBtn"  aria-pressed="false" autocomplete="off" id="planBtn_{{ plan.id }}">
+                                                {% endif %}
+                                                {{ plan.label }} ({{ plan.quota_tasks }} runs / 24h00)</button>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                </div>
+
+                                {% if not success %}
+                                <button type="submit" name="register" class="btn btn-primary btn-block mt-2 mb-4">Sign UP</button>
+                                <p class="mb-2">
+                                    Already have an account? <a href="{{ url_for('authentication_blueprint.login') }}" class="f-w-400">Sign IN</a>
+                                </p>
+                                {%  endif %}
+                            </form>
 							
 						</div>
 					</div>
@@ -73,4 +108,33 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+
+<script>
+
+    active_this_plan = function(id){
+        $(".planBtn").each(function(){
+            if (this.id === id){
+                $(this).addClass('active');
+                $(this).attr('aria-pressed', 'true');
+                $("#subscription_plan").val(id.replace("planBtn_",""));
+            } else {
+                $(this).removeClass('active');
+                $(this).attr('aria-pressed', 'false');
+            };
+        })
+    };
+
+
+    $( document ).ready(function() {
+        $(".planBtn").each(function(){
+            $(this).on('click', function(){
+                active_this_plan(this.id)
+            });
+        })
+        active_this_plan('planBtn_'+1);
+    });
+
+</script>
+
+{% endblock javascripts %}

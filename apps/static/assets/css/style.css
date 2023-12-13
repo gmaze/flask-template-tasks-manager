@@ -29271,9 +29271,9 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
     z-index: 5;
 }
 
-.auth-wrapper .auth-content:not(.container) {
-    width: 400px;
-}
+/*.auth-wrapper .auth-content:not(.container) {*/
+/*    width: 400px;*/
+/*}*/
 
 .auth-wrapper .auth-content:not(.container) .card-body {
     padding: 40px 35px;

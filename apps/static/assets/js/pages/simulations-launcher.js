@@ -283,7 +283,7 @@ fill_in_tasks_card = function(api, this_donut) {
             $("#tasks_count_cancelled").html("<i class='fas fa-circle f-10 m-r-5 text-warning'></i>" + census['cancelled']);
             this_donut.updateSeries([census['failed'], census['success'], census['cancelled']])
 
-            $("#tasks_count_total_head").html("<i class='feather icon-shopping-cart ms-1'></i> " + data.subscription_plan.quota_tasks);
+            // $("#tasks_count_total_head").html("<i class='feather icon-shopping-cart ms-1'></i> " + data.subscription_plan.quota_tasks);
 
         }
     })
@@ -328,7 +328,7 @@ fill_in_user_cards = function(api, this_donutA, this_donutB) {
             $("#tasks_count_cancelled").html("<i class='fas fa-circle f-10 m-r-5 text-warning'></i>" + census['cancelled']);
             this_donutA.updateSeries([census['failed'], census['success'], census['cancelled']])
 
-            $("#tasks_count_total_head").html("<i class='feather icon-shopping-cart ms-1'></i> " + data.subscription_plan.quota_tasks);
+            // $("#tasks_count_total_head").html("<i class='feather icon-shopping-cart ms-1'></i> " + data.subscription_plan.quota_tasks);
 
             // QUOTA CARD:
             let quota_count = data.tasks.quota_count;

@@ -75,9 +75,9 @@ def insert_in_database(app):
 
             from apps.subscriptions.models import SubscriptionPlans
             if SubscriptionPlans.query.count() == 0:
-                db.session.add(SubscriptionPlans(label='Gold', level=100, quota_tasks=1000, quota_refresh=86400))
-                db.session.add(SubscriptionPlans(label='Silver', level=75, quota_tasks=500, quota_refresh=86400))
-                db.session.add(SubscriptionPlans(label='Bronze', level=50, quota_tasks=250, quota_refresh=86400))
+                db.session.add(SubscriptionPlans(label='Gold', level=100, quota_tasks=100, quota_refresh=86400))
+                # db.session.add(SubscriptionPlans(label='Silver', level=75, quota_tasks=500, quota_refresh=86400))
+                db.session.add(SubscriptionPlans(label='Bronze', level=50, quota_tasks=50, quota_refresh=86400))
                 db.session.add(SubscriptionPlans(label='Free', level=0, quota_tasks=10, quota_refresh=86400))
                 db.session.commit()
 

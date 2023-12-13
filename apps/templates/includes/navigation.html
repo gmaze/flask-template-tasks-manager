@@ -25,33 +25,39 @@
                     </div>
                 </li>
             </ul>
+            {% if current_user.username %}
             <ul class="navbar-nav ms-auto">
                 <li>
                     <div class="dropdown drp-user">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">
-                            <i class="feather icon-user f-40"></i>
+                            <i class="feather icon-user f-40"></i> {{ current_user.username }}
                         </a>
                         <div class="dropdown-menu dropdown-menu-end profile-notification">
-                            <div class="pro-head">
-                                <i class="feather icon-user"></i>
-                                <span>
-                                    &nbsp; {{ current_user.username }}
-                                </span>
-                            </div>
+{#                            <div class="pro-head">#}
+{#                                <i class="feather icon-user"></i>#}
+{#                                <span>#}
+{#                                    {{ current_user.username }}#}
+{#                                </span>#}
+{#                            </div>#}
                             <ul class="pro-body">
                                 <li>
-                                    <a href=""
-                                       class="dropdown-item"><i
-                                            class="feather icon-settings"></i> Settings</a></li>
+                                    <a href="{{ url_for('home_blueprint.user_profile') }}"
+                                       class="dropdown-item">
+                                        <i class="feather icon-settings"></i> Profile
+                                    </a>
+                                </li>
                                 <li>
                                     <a href="{{ url_for('authentication_blueprint.logout') }}" 
-                                       class="dropdown-item"><i
-                                            class="feather icon-lock"></i> Logout</a></li>
+                                       class="dropdown-item">
+                                        <i class="feather icon-lock"></i> Logout
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 </li>
             </ul>
+            {% endif %}
         </div>
         
     

@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, jsonify
 from flask_login import (
     current_user,
     login_user,
@@ -14,6 +14,7 @@ from apps import db, login_manager
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users
+from apps.subscriptions.models import SubscriptionPlans
 
 from apps.authentication.util import verify_pass
 
@@ -24,6 +25,26 @@ def route_default():
 
 
 # Login & Registration
+
+def ValidateUsername(field):
+    if Users.find_by_username(field.data) is not None:
+        return ("Username '%s' already registered" % field.data),
+    else:
+        return None
+
+def ValidateEmail(field):
+    print('ValidateEmail data:', field.data)
+    if Users.find_by_email(field.data) is not None:
+        return ("An account with this email '%s' is already registered" % field.data),
+    else:
+        return None
+
+def ValidatePlanId(field):
+    print('ValidatePlanId data:', field.data)
+    if SubscriptionPlans.find_by_id(field.data) is None:
+        return ("Invalid Subscription Plan '%s'" % str(field.data)),
+    else:
+        return None
 
 @blueprint.route('/login', methods=['GET', 'POST'])
 def login():
@@ -41,7 +62,7 @@ def login():
         if user and verify_pass(password, user.password):
 
             login_user(user, remember=True)
-            print(user)
+            # print(user)
             return redirect(url_for('authentication_blueprint.route_default'))
 
         # Something (user or pass) is not ok
@@ -57,29 +78,26 @@ def login():
 
 @blueprint.route('/register', methods=['GET', 'POST'])
 def register():
-    create_account_form = CreateAccountForm(request.form)
+
+    list_plans = SubscriptionPlans.query.order_by(SubscriptionPlans.level).all()
+    list_plans = [p.to_dict() for p in list_plans]
+
     if 'register' in request.form:
+        this_form = CreateAccountForm(request.form)
 
-        username = request.form['username']
-        email = request.form['email']
-
-        # Check usename exists
-        user = Users.query.filter_by(username=username).first()
-        if user:
+        errors = []
+        if ValidateEmail(this_form.email) is not None:
+            errors += ValidateEmail(this_form.email)
+        if ValidateUsername(this_form.username) is not None:
+            errors += ValidateUsername(this_form.username)
+        if ValidatePlanId(this_form.plan_id) is not None:
+            errors += ValidatePlanId(this_form.plan_id)
+        if len(errors) > 0:
             return render_template('accounts/register.html',
-                                   msg='Username already registered',
-                                   success=False,
-                                   form=create_account_form)
+                                   success=False, errors=errors,
+                                   form=this_form, list_plans=list_plans)
 
-        # Check email exists
-        user = Users.query.filter_by(email=email).first()
-        if user:
-            return render_template('accounts/register.html',
-                                   msg='Email already registered',
-                                   success=False,
-                                   form=create_account_form)
-
-        # else we can create the user
+        # Else we can create the user:
         user = Users(**request.form)
         db.session.add(user)
         db.session.commit()
@@ -90,10 +108,16 @@ def register():
         return render_template('accounts/register.html',
                                msg='User created successfully.',
                                success=True,
-                               form=create_account_form)
+                               form=CreateAccountForm(), plans=None)
+
+        # Automatically Login user and redirect to the default landing page:
+        # user = Users.query.filter_by(username=username).first()
+        # login_user(user, remember=True)
+        # return redirect(url_for('authentication_blueprint.route_default'))
 
     else:
-        return render_template('accounts/register.html', form=create_account_form)
+        this_form = CreateAccountForm()
+        return render_template('accounts/register.html', form=this_form, list_plans=list_plans)
 
 
 @blueprint.route('/logout')

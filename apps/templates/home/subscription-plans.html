@@ -1,0 +1,81 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Subscription plans {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+{% endblock stylesheets %}
+
+{% block content %}
+
+	<!-- [ Main Content ] start -->
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+            <div class="row">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fa fa-battery-quarter text-secondary d-block f-40"></i>
+                            <h3 class="m-t-20 text-secondary">Free Plan</h3>
+                            <h5 class="m-t-20">The basics to get started</h5>
+                            <div class="card-body text-lg-start">
+                                <p class="m-b-20"><i class="feather icon-check-circle"></i> 10 runs/day</p>
+                                <p class="m-b-20"><i class="feather icon-circle"></i> Dashboard for runs</p>
+                                <p class="m-b-20"><i class="feather icon-circle"></i> Simulations analyser</p>
+                                <p class="m-b-20"><i class="feather icon-circle"></i> API</p>
+                            </div>
+                            <button class="btn btn-secondary btn-sm btn-round">Subscribe</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fa fa-battery-half text-success d-block f-40"></i>
+                            <h3 class="m-t-20 text-success">Standard Plan</h3>
+                            <h5 class="m-t-20">Most popular</h5>
+                            <div class="card-body text-lg-start">
+                                <p class="m-b-20"><i class="feather icon-check-circle"></i> 50 runs/day</p>
+                                <p class="m-b-20"><i class="feather icon-check-circle"></i> Dashboard for runs</p>
+                                <p class="m-b-20"><i class="feather icon-circle"></i> Simulations analyser</p>
+                                <p class="m-b-20"><i class="feather icon-circle"></i> API</p>
+                            </div>
+                            <button class="btn btn-success btn-sm btn-round">Subscribe</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fa fa-battery-full text-info d-block f-40"></i>
+                            <h3 class="m-t-20 text-info">Expert Plan</h3>
+                            <h5 class="m-t-20">Full Virtual Research Environment</h5>
+                            <div class="card-body text-lg-start">
+                                <p class="m-b-20"><i class="feather icon-check-circle"></i> 100 runs/day</p>
+                                <p class="m-b-20"><i class="feather icon-check-circle"></i> Dashboard for runs</p>
+                                <p class="m-b-20"><i class="feather icon-check-circle"></i> Simulations analyser</p>
+                                <p class="m-b-20"><i class="feather icon-check-circle"></i> API</p>
+                            </div>
+                            <button class="btn btn-info btn-sm btn-round">Subscribe</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
+    <script src="/static/assets/js/pages/simulations-launcher.js"></script>
+
+    <script>
+    var API = {{ url_for("api_blueprint.tasks_task_list") | tojson }};
+    </script>
+
+
+{% endblock javascripts %}
