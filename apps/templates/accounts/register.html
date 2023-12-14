@@ -74,9 +74,9 @@
                                             {% for plan in list_plans %}
                                                 {%  if plan.level <= 0 %}
                                                 <button type="button" class="btn btn-outline-secondary planBtn" aria-pressed="false" autocomplete="off" id="planBtn_{{ plan.id }}">
-                                                {%  elif plan.level <= 1 %}
+                                                {%  elif plan.level <= 50 %}
                                                 <button type="button" class="btn btn-outline-success planBtn" aria-pressed="false" autocomplete="off" id="planBtn_{{ plan.id }}">
-                                                {%  elif plan.level <= 2 %}
+                                                {%  elif plan.level <= 100 %}
                                                 <button type="button" class="btn btn-outline-info planBtn"  aria-pressed="false" autocomplete="off" id="planBtn_{{ plan.id }}">
                                                 {%  else %}
                                                 <button type="button" class="btn btn-outline-light planBtn"  aria-pressed="false" autocomplete="off" id="planBtn_{{ plan.id }}">
@@ -132,7 +132,7 @@
                 active_this_plan(this.id)
             });
         })
-        active_this_plan('planBtn_'+1);
+        active_this_plan('planBtn_'+3);
     });
 
 </script>
