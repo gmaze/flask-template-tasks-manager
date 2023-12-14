@@ -13,20 +13,30 @@
 								class="pcoded-mtext">Dashboard</span></a>
 					</li>
 					<li class="nav-item">
-						<a href="{{ url_for('simulations_blueprint.simulations') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-fast-forward"></i></span><span
-								class="pcoded-mtext">Simulations</span></a>
+						<a href="{{ url_for('simulations_blueprint.default_route') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-fast-forward"></i></span><span
+								class="pcoded-mtext">Your Simulations</span></a>
 					</li>
+                    {% if current_user.is_authenticated and current_user.role.level >= 100 %}
+					<li class="nav-item">
+						<a href="{{ url_for('simulations_blueprint.dashboard') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-fast-forward"></i></span><span
+								class="pcoded-mtext">Sims dashboard</span></a>
+					</li>
+                    {% endif %}
 					<li class="nav-item">
 						<a href="{{ url_for('home_blueprint.subscription_plans') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-shopping-cart"></i></span><span
 								class="pcoded-mtext">Subscription plans</span></a>
 					</li>
-					<li class="nav-item pcoded-hasmenu">
-						<a href="#" class="nav-link "><span class="pcoded-micon"><i class="feather icon-settings"></i></span><span
+					<li class="nav-item">
+						<a href="{{ url_for('home_blueprint.user_profile') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-settings"></i></span><span
 								class="pcoded-mtext">Settings</span></a>
-						<ul class="pcoded-submenu">
-							<li><a href="{{ url_for('home_blueprint.user_profile') }}">Profile</a></li>
-						</ul>
 					</li>
+{#					<li class="nav-item pcoded-hasmenu">#}
+{#						<a href="#" class="nav-link "><span class="pcoded-micon"><i class="feather icon-settings"></i></span><span#}
+{#								class="pcoded-mtext">Settings</span></a>#}
+{#						<ul class="pcoded-submenu">#}
+{#							<li><a href="{{ url_for('home_blueprint.user_profile') }}">Profile</a></li>#}
+{#						</ul>#}
+{#					</li>#}
 				</ul>
                 <div class="card text-center">
 					<div class="card-body px-3">

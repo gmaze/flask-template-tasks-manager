@@ -13,8 +13,6 @@ from jinja2 import TemplateNotFound
 @login_required
 def index():
     return render_template('home/index.html', segment='index')
-    # print(current_user)
-    # return redirect(url_for('home_blueprint.subscription_plans'))
 
 
 @blueprint.route('/settings')

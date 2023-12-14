@@ -3,8 +3,9 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
 from typing import List
+from flask import abort
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped
@@ -13,6 +14,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import DateTime
 from datetime import date, datetime, timedelta
 import uuid
+from functools import wraps
 
 from apps import db, login_manager
 from apps.authentication.util import hash_pass
@@ -208,3 +210,17 @@ def request_loader(request):
     username = request.form.get('username')
     user = Users.query.filter_by(username=username).first()
     return user if user else None
+
+
+def role_required(view_function):
+    """A Decorator ensuring authenticated user has a specific role level"""
+    @wraps(view_function)
+    def decorated_function(*args, **kwargs):
+        if current_user is not None:
+            if current_user.role_level < 100:
+                abort(401, "Insufficient privilege")
+            else:
+                return view_function(*args, **kwargs)
+        else:
+            abort(401, "Insufficient privilege")
+    return decorated_function

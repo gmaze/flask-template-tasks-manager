@@ -1,0 +1,90 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Tasks | Dashboard {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+    .progress {
+      background-color: #aef;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+    }
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+	<!-- [ Main Content ] start -->
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+
+			<!-- [ Main Content ] start -->
+            <div class="row">
+
+                <!-- [ List of ALL users simulations-page ] start -->
+				<div class="col-md-12">
+					<div class="card table-card">
+						<div class="card-header">
+							<h5>List of simulations</h5>
+						</div>
+						<div class="card-body">
+                            <div class="table-responsive">
+                                <div class="customer-scroll" style="height:562px;position:relative;">
+                                    <table class="table table-hover m-b-0" id="tasks_table">
+                                        <thead>
+                                            <tr>
+                                                <th><span>Tasks ID</span></th>
+                                                <th><span>User</span></th>
+                                                <th><span>Status</span></th>
+                                                <th><span>Number of floats</span></th>
+                                                <th><span>Label</span></th>
+                                                <th><span>Actions</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- [ List of ALL users simulations-page ] end -->
+
+            </div>
+			<!-- [ Main Content ] end -->
+		</div>
+	</div>
+	<!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
+    <script src="/static/assets/js/pages/simulations-launcher.js"></script>
+
+    <script>
+    var API_TASKS = {{ url_for("api_blueprint.tasks_task_list") | tojson }};
+    var API_TASKS_CANCEL = {{ url_for("api_blueprint.tasks_task_2") | tojson }};
+    var API_USERS = {{ url_for("api_blueprint.users_user_2") | tojson }};
+    var APIKEY = {{ current_user.apikey | tojson }};
+
+    var RefreshTasksList = window.setInterval(function(){
+        list_tasks(API_TASKS, API_TASKS_CANCEL);
+    }, 2000);
+
+    var donut1;
+    var donut2;
+    $( document ).ready(function() {
+        $('button[name=reset]').trigger('click');
+        list_tasks(API_TASKS, API_TASKS_CANCEL);
+    })
+
+
+    </script>
+
+
+{% endblock javascripts %}

@@ -27,6 +27,10 @@ def register_blueprints(app):
         module = import_module('apps.{}.routes'.format(module_name))
         app.register_blueprint(module.blueprint)
 
+    # from .simulations import blueprint
+    # app.register_blueprint(blueprint, url_prefix='/simulations')
+
+
 
 def configure_database(app):
 

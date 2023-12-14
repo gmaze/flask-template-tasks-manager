@@ -1,8 +1,9 @@
 from flask_restx import Namespace, Resource, fields
-from flask import abort, Response
+from flask import abort
+from werkzeug.exceptions import TooManyRequests
 
 from apps import db
-from apps.apis.util import TasksManager, apikey_required, APIkey
+from apps.apis.util import TasksManager, APIkey, apikey_required, apikey_admin_required
 from apps.authentication.models import Users as dbUsers
 
 
@@ -46,25 +47,54 @@ task = api.model("Task", {
 
 T = TasksManager(db.session)
 
-
-@api.route('/')
+@api.route('/all')
 class TaskList(Resource):
 
     @api.doc('list_tasks')
     @api.marshal_list_with(task)
     @api.doc(security='apikey')
     @apikey_required
+    @apikey_admin_required
     def get(self):
-        """List all tasks"""
-        # return T.tasks
-        return T.tasks_by_apikey(APIkey().key)
+        """Fetch all tasks at once (requires Admin privilege)"""
+        # One user is trying to access all tasks
+        return T.tasks
+
+@api.route('/', defaults={'id': None}, methods=['GET', 'POST'])
+@api.route('/<int:id>', methods=['GET', 'DELETE'])
+@api.param('id', 'The task identifier')
+# @api.response(404, 'Task not found')
+# @api.response(403, 'Task has not been executed and cannot be cancelled')
+class Task(Resource):
+
+    @api.doc('get_task')
+    @api.marshal_with(task)
+    @api.doc(security='apikey')
+    @apikey_required
+    def get(self, id):
+        """Fetch task data"""
+        if id is None:
+            # Return tasks created with this API key:
+            return T.tasks_by_apikey(APIkey().key), 200
+        else:
+            # Retrieve this task:
+            t = T.get(id)
+
+            # Then check if this task was created with this API key:
+            if t['user']['user_id'] == APIkey().user_id:
+                return t, 200
+            else:
+                if APIkey().user_role_level >= 100:  # Check if API key has enough privileges:
+                    return t, 200
+                else:
+                    abort(401, "The provided API key must have enough privilege or match the one used to create this task")
 
     @api.doc('create_task')
     @api.expect(task_params)
     @api.marshal_with(task, code=201)
     @api.doc(security='apikey')
     @apikey_required
-    def post(self):
+    def post(self, id):
         """Create a new task"""
         user_id = APIkey().user_id
         api.payload['user_id'] = user_id
@@ -75,35 +105,19 @@ class TaskList(Resource):
             created = T.create(api.payload)
             return created
         else:
-            # abort(429, "You reached your subscription plan tasks limit.")
-            # resp = Response("Foo bar baz")
-            # resp.headers['Access-Control-Allow-Origin'] = '*'
-            return "You reached your subscription plan tasks limit.", 429, {"Retry-After": this_user.tasks_desc_to_dict['retry-after']}
-
-@api.route('/<int:id>')
-@api.param('id', 'The task identifier')
-@api.response(404, 'Task not found')
-@api.response(403, 'Task has not been executed and cannot be cancelled')
-class Task(Resource):
-
-    @api.doc('get_task')
-    @api.marshal_with(task)
-    @api.doc(security='apikey')
-    @apikey_required
-    def get(self, id):
-        """Fetch a task given its identifier"""
-        return T.get(id), 200
+            raise TooManyRequests("You reached your subscription plan tasks limit", retry_after=this_user.tasks_desc_to_dict['retry-after'])
 
     @api.doc('cancel_task')
     @api.response(204, 'Task cancelled')
+    @api.response(401, 'Insufficient privileges')
     @api.marshal_with(task, code=204)
     @api.doc(security='apikey')
     @apikey_required
     def delete(self, id):
         """Cancel/kill jobs associated with a task"""
-        if T.get(id)['user']['user_id'] != APIkey().user_id:
+        if T.get(id)['user']['user_id'] != APIkey().user_id and APIkey().user_role_level < 100:
             # abort(401, "You can't cancel this task because you don't have enough privileges !")
-            abort(401, "The provided API key must match the one used to create this task in order to cancel it")
+            abort(401, "The provided API key must have enough privilege or match the one used to create this task")
         else:
             T.cancel(id)
 

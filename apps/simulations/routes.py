@@ -1,6 +1,9 @@
 from flask import (
     render_template,
     request,
+    abort,
+    redirect,
+    url_for
 )
 from flask_login import (
     current_user,
@@ -10,16 +13,16 @@ from flask_login import (
 from apps import db
 from apps.simulations import blueprint
 from apps.simulations.forms import SimulationForm
-from apps.authentication.models import Users
+from apps.authentication.models import Users, role_required
 from apps.apis.util import TasksManager
 
 
 T = TasksManager(db.session)
 
 
-@blueprint.route('/simulations', methods=['GET', 'POST'])
+@blueprint.route('/', methods=['GET', 'POST'])
 @login_required
-def simulations():
+def default_route():
     simulation_form = SimulationForm(request.form)
 
     if 'launch' in request.form:
@@ -51,3 +54,14 @@ def simulations():
 
     return render_template('simulations/launcher.html',
                            form=simulation_form)
+
+@blueprint.route('/dashboard', methods=['GET'])
+@login_required
+def dashboard():
+    if current_user.is_authenticated:
+        if current_user.role_level < 100:
+            return render_template('home/page-401.html'), 401
+        else:
+            return render_template('simulations/dashboard.html')
+    else:
+        return render_template('home/page-403.html'), 403

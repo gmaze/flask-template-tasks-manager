@@ -31,7 +31,10 @@ html_progress = function(value, vmin=0, vmax=100, color='secondary', txt){
     return html
 }
 
-list_tasks = function(api) {
+list_tasks = function(api, api_cancel = null) {
+    if (api_cancel === null){
+        api_cancel = api;
+    }
     $.ajax({
       url:api,
       type:"GET",
@@ -106,7 +109,7 @@ list_tasks = function(api) {
             let runid = $(this).data('vf-runid');
             console.log("Cancelling " + runid);
             $.ajax({
-                url: api + "/" + runid,
+                url: api_cancel + "/" + runid,
                 type: "DELETE",
                 headers: {'X-API-KEY': APIKEY},
                 contentType: "application/json; charset=utf-8",

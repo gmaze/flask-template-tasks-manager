@@ -29,14 +29,74 @@ curl -X 'DELETE' \
   -H 'accept: application/json'
 ```
 
-# Jobs collection
+# Tasks
 
+## GET
+
+### For a user to get all its tasks:
 ```bash
 curl -X 'GET' \
   'http://127.0.0.1:5000/api/1/tasks/' \
+  -H 'X-API-KEY: b09387d5d8d447268d88f8e09e54373f' \
+  -H 'accept: application/json'
+```
+
+### For a user to get one task:
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/tasks/7' \
+  -H 'X-API-KEY: b09387d5d8d447268d88f8e09e54373f' \
+  -H 'accept: application/json'
+```
+
+### For a user to get someone else task (error):
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/tasks/2' \
+  -H 'X-API-KEY: b09387d5d8d447268d88f8e09e54373f' \
+  -H 'accept: application/json'
+```
+
+### For an admin to get someone else task:
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/tasks/2' \
+  -H 'X-API-KEY: e128584706e24065995c0b99b042a945' \
+  -H 'accept: application/json'
+```
+
+### For an admin to get all tasks:
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/tasks/all' \
+  -H 'X-API-KEY: e128584706e24065995c0b99b042a945' \
+  -H 'accept: application/json'
+```
+
+### For any user to get all tasks (error):
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/tasks/all' \
   -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b' \
   -H 'accept: application/json'
 ```
+
+## POST
+
+### For a user to submit a new task:
+
+```bash
+curl -v -X POST \
+  'http://127.0.0.1:5000/api/1/tasks/' \
+  -H 'accept: application/json' \
+  -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "nfloats": 1000,
+  "label": "dummy run"
+}'
+```
+
 
 # Users
 
