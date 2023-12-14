@@ -8,6 +8,7 @@ from flask import Blueprint
 from flask_restx import Api
 from .namespace_tasks import api as ns_tasks
 from .namespace_users import api as ns_users
+from .namespace_plans import api as ns_plans
 import logging
 
 
@@ -28,3 +29,4 @@ api = Api(blueprint,
 
 api.add_namespace(ns_tasks)
 api.add_namespace(ns_users)
+api.add_namespace(ns_plans)

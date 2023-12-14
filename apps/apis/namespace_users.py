@@ -3,7 +3,7 @@ from flask import abort
 
 from apps.apis.util import APIkey, apikey_required, apikey_admin_required
 from apps.authentication.models import Users as dbUsers
-
+from apps.apis.namespace_plans import subscription_plan
 
 authorizations = {
     'apikey': {
@@ -20,14 +20,6 @@ role = api.model("UserRole", {
     'label': fields.String(description='Role description'),
     'level': fields.Integer(description='Role level'),
 })
-
-subscription_plan = api.model("SubscriptionPlan", {
-    'label': fields.String(description='Subscription description'),
-    # 'level': fields.Integer(description='Subscription level'),
-    'quota_tasks': fields.Integer(description="Tasks quota by 'refresh' time frame"),
-    'quota_refresh': fields.Integer(description='Quota refresh time frame in seconds'),
-})
-
 
 result = api.model("TaskResult", {
     'success': fields.Integer(description='Task achieved with success'),

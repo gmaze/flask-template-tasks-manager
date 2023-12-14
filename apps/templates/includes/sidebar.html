@@ -13,15 +13,9 @@
 								class="pcoded-mtext">Dashboard</span></a>
 					</li>
 					<li class="nav-item">
-						<a href="{{ url_for('simulations_blueprint.default_route') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-fast-forward"></i></span><span
+						<a href="{{ url_for('simulations_blueprint.default_route') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-cpu"></i></span><span
 								class="pcoded-mtext">Your Simulations</span></a>
 					</li>
-                    {% if current_user.is_authenticated and current_user.role.level >= 100 %}
-					<li class="nav-item">
-						<a href="{{ url_for('simulations_blueprint.dashboard') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-fast-forward"></i></span><span
-								class="pcoded-mtext">Sims dashboard</span></a>
-					</li>
-                    {% endif %}
 					<li class="nav-item">
 						<a href="{{ url_for('home_blueprint.subscription_plans') }}" class="nav-link "><span class="pcoded-micon"><i class="feather icon-shopping-cart"></i></span><span
 								class="pcoded-mtext">Subscription plans</span></a>
@@ -37,6 +31,16 @@
 {#							<li><a href="{{ url_for('home_blueprint.user_profile') }}">Profile</a></li>#}
 {#						</ul>#}
 {#					</li>#}
+                    {% if current_user.is_authenticated and current_user.role.level >= 100 %}
+					<li class="nav-item pcoded-hasmenu">
+						<a href="#" class="nav-link "><span class="pcoded-micon"><i class="feather icon-sliders"></i></span><span
+								class="pcoded-mtext">Admin pannels</span></a>
+						<ul class="pcoded-submenu">
+							<li><a href="{{ url_for('admin_blueprint.admin_users') }}"><i class="feather icon-user"></i> Users</a></li>
+							<li><a href="{{ url_for('admin_blueprint.admin_tasks') }}"><i class="feather icon-cpu"></i> Simulations</a></li>
+						</ul>
+					</li>
+                    {% endif %}
 				</ul>
                 <div class="card text-center">
 					<div class="card-body px-3">

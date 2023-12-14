@@ -1,0 +1,219 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Users | Dashboard {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+    .progress {
+      background-color: #aef;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+    }
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+	<!-- [ Main Content ] start -->
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+
+			<!-- [ Main Content ] start -->
+            <div class="row">
+
+                <!-- [ List of ALL users ] start -->
+				<div class="col-md-12">
+					<div class="card table-card">
+						<div class="card-header">
+							<h5>List of users</h5>
+						</div>
+						<div class="card-body">
+                            <div class="table-responsive">
+                                <div class="customer-scroll" style="height:562px;position:relative;">
+                                    <table class="table table-hover m-b-0" id="users_table">
+                                        <thead>
+                                            <tr>
+                                                <th><span>Users ID</span></th>
+                                                <th><span>Creation Date</span></th>
+{#                                                <th><span>Last Connection</span></th>#}
+                                                <th><span>login</span></th>
+                                                <th><span>Email</span></th>
+                                                <th><span>Role</span></th>
+                                                <th><span>Subscription Plan</span></th>
+                                                <th><span>Tasks Quota</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- [ List of ALL users] end -->
+
+            </div>
+			<!-- [ Main Content ] end -->
+		</div>
+	</div>
+	<!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
+    <script src="/static/assets/js/pages/simulations-launcher.js"></script>
+
+    <script>
+    var API_USERS = {{ url_for("api_blueprint.users_user_list") | tojson }};
+    var API_PLANS = {{ url_for("api_blueprint.plans_plans") | tojson }};
+    var APIKEY = {{ current_user.apikey | tojson }};
+
+    get_html_quota_bar = function(data){
+        let quota_count = Number(data.quota_count);
+        let quota_left = Number(data.quota_left);
+        let quota_total = quota_count + quota_left;
+        let consumed = quota_count * 100 / quota_total;
+        if (consumed <= 25){
+            quota_color = 'success';
+        } else if (consumed <= 50) {
+            quota_color = 'info';
+        } else if (consumed <= 75) {
+            quota_color = 'warning';
+        } else if (consumed <= 100) {
+            quota_color = 'danger';
+        }
+
+        quota_html = quota_count + "/" + quota_total + " ("+consumed+"%)";
+        quota_html += "<div class='progress mt-1' style='height:4px;'>";
+        quota_html += "<div class='progress-bar bg-"+quota_color+" rounded' role='progressbar' ";
+        quota_html += "style='width: "+consumed+"%;' aria-valuenow='"+consumed+"' ";
+        quota_html += "aria-valuemin='0' aria-valuemax='100'>";
+        quota_html += "</div></div>";
+
+        return quota_html;
+    }
+
+    get_html_role = function(data){
+        let color;
+        if (data.level == 0) {
+            color = ["secondary", "white"];
+        } else if (data.level <= 50) {
+            color = ["success", "white"];
+        } else if (data.level <= 100) {
+            color = ["info", "white"];
+        } else {
+            color = ["light", "dark"];
+        }
+        {#html = "<div class='p-1 m-1 bg-"+color[0]+" text-"+color[1]+"'>"+data.label+"</div>";#}
+        html = "<div class='p-0 m-0'>"+data.label+"</div>";
+        return html
+    }
+
+    get_html_plan = function(data){
+        let color;
+        if (data.level == 0) {
+            color = ["secondary", "white"];
+        } else if (data.level <= 50) {
+            color = ["success", "white"];
+        } else if (data.level <= 100) {
+            color = ["info", "white"];
+        } else {
+            color = ["light", "dark"];
+        }
+        html = "<div class='p-1 m-0 bg-"+color[0]+" text-"+color[1]+" text-center'>"+data.label+"</div>";
+        return html;
+    }
+
+    get_html_plan_btn = function(data){
+        html = "<div class='btn-group rounded-3' role='group' aria-label='Basic example'>";
+        let color;
+        for (let i = 0; i < list_of_plans.length; i++) {
+
+            if (list_of_plans[i].level == 0) {
+                color = ["secondary", "white"];
+            } else if (list_of_plans[i].level <= 50) {
+                color = ["success", "white"];
+            } else if (list_of_plans[i].level <= 100) {
+                color = ["info", "white"];
+            } else {
+                color = ["light", "dark"];
+            }
+
+            html += "<button type='button' class='btn btn-sm btn-outline-"+color[0];
+            if (data.label === list_of_plans[i].label) {
+                html += " active' aria-pressed='true'>";
+            } else {
+                html += "' aria-pressed='false'>";
+            }
+            html += list_of_plans[i].label;
+            html += "</button>";
+        }
+        return html
+    }
+
+
+    list_users = function(api, api_cancel = null) {
+        if (api_cancel === null){
+            api_cancel = api;
+        }
+        $.ajax({
+          url:api,
+          type:"GET",
+          headers: { 'X-API-KEY': APIKEY },
+          contentType:"application/json; charset=utf-8",
+          dataType:"json",
+          success: function(data){
+            var html = '';
+            for(var i = 0; i < data.length; i++){
+
+                let created = new Date(data[i].created);
+
+                html += '<tr>'+
+                            '<td>' + data[i].id + '</td>' +
+                            '<td>' + created.toDateString() + '</td>' +
+                            //'<td>' + '</td>' +
+                            '<td>' + data[i].username + '</td>' +
+                            '<td>' + data[i].email + '</td>' +
+                            '<td>' + get_html_role(data[i].role) + '</td>' +
+                            '<td>' + get_html_plan_btn(data[i].subscription_plan) + '</td>' +
+                            '<td>' + get_html_quota_bar(data[i].tasks) + '</td>' +
+                        '</tr>';
+                }
+            $('#users_table tbody').html(html);
+
+          },
+
+        })
+    };
+
+
+    var RefreshUsersList = window.setInterval(function(){
+        list_users(API_USERS);
+    }, 200000);
+
+
+    var list_of_plans;
+    $( document ).ready(function() {
+        $.ajax({
+              url:API_PLANS,
+              type:"GET",
+              headers: { 'X-API-KEY': APIKEY },
+              contentType:"application/json; charset=utf-8",
+              dataType:"json",
+              success: function(data){
+                  list_of_plans = data;
+              }
+        });
+        list_users(API_USERS);
+    })
+
+
+    </script>
+
+
+{% endblock javascripts %}

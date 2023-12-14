@@ -55,13 +55,3 @@ def default_route():
     return render_template('simulations/launcher.html',
                            form=simulation_form)
 
-@blueprint.route('/dashboard', methods=['GET'])
-@login_required
-def dashboard():
-    if current_user.is_authenticated:
-        if current_user.role_level < 100:
-            return render_template('home/page-401.html'), 401
-        else:
-            return render_template('simulations/dashboard.html')
-    else:
-        return render_template('home/page-403.html'), 403
