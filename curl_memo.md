@@ -34,14 +34,48 @@ curl -X 'DELETE' \
 ```bash
 curl -X 'GET' \
   'http://127.0.0.1:5000/api/1/tasks/' \
-  -H 'X-API-KEY: 8f0f6b0698e545c0a0c70a0aa6e99e5e' \
+  -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b' \
   -H 'accept: application/json'
 ```
 
-# Get one user data
+# Users
+
+## For a user to get its data:
 ```bash
 curl -X 'GET' \
   'http://127.0.0.1:5000/api/1/users/' \
-  -H 'X-API-KEY: e353e0ad1de149bcb26f41e2b0a35e75' \
+  -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b' \
   -H 'accept: application/json'
+```
+
+## From admin to get all users data:
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/users/all' \
+  -H 'accept: application/json' \
+  -H 'X-API-KEY: e128584706e24065995c0b99b042a945'
+```
+
+From any user:
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/users/all' \
+  -H 'accept: application/json' \
+  -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b'
+```
+
+## From admin to get one user data:
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/users/2' \
+  -H 'X-API-KEY: e128584706e24065995c0b99b042a945' \
+  -H 'accept: application/json'
+```
+
+From any user:
+```bash
+curl -X 'GET' \
+  'http://127.0.0.1:5000/api/1/users/2' \
+  -H 'accept: application/json' \
+  -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b'
 ```

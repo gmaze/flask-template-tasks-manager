@@ -1,8 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask import abort
 
-from apps import db
-from apps.apis.util import TasksManager, apikey_required, APIkey
+from apps.apis.util import APIkey, apikey_required, apikey_admin_required
 from apps.authentication.models import Users as dbUsers
 
 
@@ -67,10 +66,10 @@ class UserList(Resource):
     @api.marshal_list_with(user)
     @api.doc(security='apikey')
     @apikey_required
+    @apikey_admin_required
     def get(self):
-        """Fetch all users at once"""
+        """Fetch all users at once (requires Admin privilege)"""
         # One user is trying to access all user profiles
-        # todo implement privilege control
 
         # Get the list of users:
         DBresults = dbUsers.query.order_by(dbUsers.id.desc()).all()
@@ -97,9 +96,11 @@ class User(Resource):
         if id is None:
             user_id = APIkey().user_id
         else:
-            # One user is trying to access another user profile
-            # todo implement privilege control
-            user_id = id
+            # One user is trying to access another user profile:
+            if APIkey().user_role_level >= 100:
+                user_id = id
+            else:
+                abort(401, "Insufficient privilege")
 
         u = dbUsers.find_by_id(user_id)
 

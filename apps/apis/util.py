@@ -302,6 +302,13 @@ class APIkey:
         else:
             abort(401, "Invalid API key")
 
+    @property
+    def user_role_level(self):
+        if self.is_valid:
+            return self.user.role.level
+        else:
+            abort(401, "Invalid API key")
+
 
 def apikey_required(view_function):
     """A Decorator ensuring we're passing in a valid APIkey"""
@@ -309,6 +316,19 @@ def apikey_required(view_function):
     def decorated_function(*args, **kwargs):
         if APIkey().is_valid:
             return view_function(*args, **kwargs)
+        else:
+            abort(401, "Invalid API key")
+    return decorated_function
+
+def apikey_admin_required(view_function):
+    """A Decorator ensuring API-key corresponds to an Admin role level"""
+    @wraps(view_function)
+    def decorated_function(*args, **kwargs):
+        if APIkey().is_valid:
+            if APIkey().user_role_level >= 100:
+                return view_function(*args, **kwargs)
+            else:
+                abort(401, "Insufficient privilege")
         else:
             abort(401, "Invalid API key")
     return decorated_function
