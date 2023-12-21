@@ -30,7 +30,7 @@
 						</div>
 						<div class="card-body">
                             <div class="table-responsive">
-                                <div class="customer-scroll" style="height:562px;position:relative;">
+                                <div class="customer-scroll">
                                     <table class="table table-hover m-b-0" id="users_table">
                                         <thead>
                                             <tr>
@@ -65,13 +65,14 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
-    <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
-    <script src="/static/assets/js/pages/simulations-launcher.js"></script>
+    <script src="/static/assets/js/pages/users.js"></script>
+    <script src="/static/assets/js/pages/plans.js"></script>
 
     <script>
-    var API_USERS = {{ url_for("api_blueprint.users_user_list") | tojson }};
-    var API_PLANS = {{ url_for("api_blueprint.plans_plans") | tojson }};
     var APIKEY = {{ current_user.apikey | tojson }};
+    API_USERS = {{ url_for("api_blueprint.users_user_list") | tojson }};
+    API_USERS_UPDATE = {{ url_for("api_blueprint.users_user_2") | tojson }};
+    API_PLANS = {{ url_for("api_blueprint.plans_plans") | tojson }};
 
     get_html_quota_bar = function(data){
         let quota_count = Number(data.quota_count);
@@ -114,105 +115,46 @@
         return html
     }
 
-    get_html_plan = function(data){
-        let color;
-        if (data.level == 0) {
-            color = ["secondary", "white"];
-        } else if (data.level <= 50) {
-            color = ["success", "white"];
-        } else if (data.level <= 100) {
-            color = ["info", "white"];
-        } else {
-            color = ["light", "dark"];
-        }
-        html = "<div class='p-1 m-0 bg-"+color[0]+" text-"+color[1]+" text-center'>"+data.label+"</div>";
-        return html;
-    }
-
-    get_html_plan_btn = function(data){
-        html = "<div class='btn-group rounded-3' role='group' aria-label='Basic example'>";
-        let color;
-        for (let i = 0; i < list_of_plans.length; i++) {
-
-            if (list_of_plans[i].level == 0) {
-                color = ["secondary", "white"];
-            } else if (list_of_plans[i].level <= 50) {
-                color = ["success", "white"];
-            } else if (list_of_plans[i].level <= 100) {
-                color = ["info", "white"];
-            } else {
-                color = ["light", "dark"];
+    function build_view(data, textStatus, jqXHR){
+        var html = '';
+        for(var i = 0; i < LIST_USERS.length; i++){
+            let created = new Date(LIST_USERS[i].created);
+            html += '<tr>'+
+                        '<td>' + LIST_USERS[i].id + '</td>' +
+                        '<td>' + created.toDateString() + '</td>' +
+                        //'<td>' + '</td>' +
+                        '<td>' + LIST_USERS[i].username + '</td>' +
+                        '<td>' + LIST_USERS[i].email + '</td>' +
+                        '<td>' + get_html_role(LIST_USERS[i].role) + '</td>' +
+                        '<td class="UserPlan" data-user-id="'+LIST_USERS[i].id+'">' + get_html_plan_btn(LIST_USERS[i]) + '</td>' +
+                        '<td>' + get_html_quota_bar(LIST_USERS[i].tasks) + '</td>' +
+                    '</tr>';
             }
+        $('#users_table tbody').html(html);
 
-            html += "<button type='button' class='btn btn-sm btn-outline-"+color[0];
-            if (data.label === list_of_plans[i].label) {
-                html += " active' aria-pressed='true'>";
-            } else {
-                html += "' aria-pressed='false'>";
-            }
-            html += list_of_plans[i].label;
-            html += "</button>";
-        }
-        return html
-    }
-
-
-    list_users = function(api, api_cancel = null) {
-        if (api_cancel === null){
-            api_cancel = api;
-        }
-        $.ajax({
-          url:api,
-          type:"GET",
-          headers: { 'X-API-KEY': APIKEY },
-          contentType:"application/json; charset=utf-8",
-          dataType:"json",
-          success: function(data){
-            var html = '';
-            for(var i = 0; i < data.length; i++){
-
-                let created = new Date(data[i].created);
-
-                html += '<tr>'+
-                            '<td>' + data[i].id + '</td>' +
-                            '<td>' + created.toDateString() + '</td>' +
-                            //'<td>' + '</td>' +
-                            '<td>' + data[i].username + '</td>' +
-                            '<td>' + data[i].email + '</td>' +
-                            '<td>' + get_html_role(data[i].role) + '</td>' +
-                            '<td>' + get_html_plan_btn(data[i].subscription_plan) + '</td>' +
-                            '<td>' + get_html_quota_bar(data[i].tasks) + '</td>' +
-                        '</tr>';
+        // Attach buttons callback:
+        $(".UserPlan > div > button").each(function(){
+            $(this).on('click', function(){
+                let plan_name = $(this).text();
+                let plan_id;
+                for (let i = 0; i < LIST_OF_PLANS.length; i++) {
+                    if (plan_name === LIST_OF_PLANS[i].label){
+                        plan_id = LIST_OF_PLANS[i].id
+                    }
                 }
-            $('#users_table tbody').html(html);
-
-          },
-
+                let user_id = $(this).closest('.UserPlan').data('user-id');
+                update_profile({'user_id': user_id, 'plan_id': plan_id}, list_users, build_view);
+            })
         })
     };
 
-
     var RefreshUsersList = window.setInterval(function(){
-        list_users(API_USERS);
-    }, 200000);
+        list_users().then(build_view);
+    }, 10000);
 
-
-    var list_of_plans;
     $( document ).ready(function() {
-        $.ajax({
-              url:API_PLANS,
-              type:"GET",
-              headers: { 'X-API-KEY': APIKEY },
-              contentType:"application/json; charset=utf-8",
-              dataType:"json",
-              success: function(data){
-                  list_of_plans = data;
-              }
-        });
-        list_users(API_USERS);
+        load_plans().then(list_users).then(build_view);
     })
-
-
     </script>
 
 

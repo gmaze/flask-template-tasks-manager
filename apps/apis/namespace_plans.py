@@ -5,6 +5,7 @@ from apps.subscriptions.models import SubscriptionPlans as dbPlans
 api = Namespace('plans', description='Subscription Plans')
 
 subscription_plan = api.model("SubscriptionPlan", {
+    'id': fields.Integer(description='Subscription ID'),
     'label': fields.String(description='Subscription description'),
     'level': fields.Integer(description='Subscription level'),
     'quota_tasks': fields.Integer(description="Tasks quota by 'refresh' time frame"),

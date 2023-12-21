@@ -18,7 +18,7 @@ def index():
 @blueprint.route('/settings')
 @login_required
 def user_profile():
-    return render_template('home/account.html', segment='index')
+    return render_template('home/profile.html', segment='index')
 
 
 @blueprint.route('/subscription-plans')

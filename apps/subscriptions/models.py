@@ -63,6 +63,11 @@ class SubscriptionPlans(db.Model):
     def find_by_id(self, id):
         return self.query.filter_by(id=id).first()
 
+    @classmethod
     def plans(self) -> List[dict]:
         all_plans = self.query.order_by(self.level).all()
         return [self.to_dict(p) for p in all_plans]
+
+    @classmethod
+    def default_plan(self):
+        return self.query.order_by(self.level).first().to_dict()

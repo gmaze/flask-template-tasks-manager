@@ -117,7 +117,10 @@ def register():
 
     else:
         this_form = CreateAccountForm()
-        return render_template('accounts/register.html', form=this_form, list_plans=list_plans)
+        valid_id = [p['id'] for p in SubscriptionPlans.plans()]
+        plan_id = request.args.get("plan_id", default=SubscriptionPlans.default_plan()['id'], type=int)
+        plan_id = plan_id if plan_id in valid_id else SubscriptionPlans.default_plan()['id']
+        return render_template('accounts/register.html', form=this_form, list_plans=list_plans, selected_plan_id=plan_id)
 
 
 @blueprint.route('/logout')

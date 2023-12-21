@@ -26,35 +26,33 @@
                             <div class="form-group row">
                                 <label for="staticUsername" class="col-sm-4 col-form-label">Username</label>
                                 <div class="col-sm-8">
-                                  <input type="text" readonly class="form-control-plaintext" id="staticUsername" value="{{ current_user.username }}">
+                                  <input type="text" readonly class="form-control-plaintext" id="staticUsername" value="">
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label for="staticEmail" class="col-sm-4 col-form-label">Email</label>
                                 <div class="col-sm-8">
-                                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="{{ current_user.email }}">
+                                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="">
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label for="staticRole" class="col-sm-4 col-form-label">Role</label>
                                 <div class="col-sm-8">
-                                  <input type="text" readonly class="form-control-plaintext" id="staticRole" value="{{ current_user.role.label }}">
+                                  <input type="text" readonly class="form-control-plaintext" id="staticRole" value="">
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label for="staticPlan" class="col-sm-4 col-form-label">Subscription Plan</label>
-                                <div class="col-sm-8">
-                                  <input type="text" readonly class="form-control-plaintext" id="staticPlan" value="{{ current_user.plan.label }} ({{ current_user.plan.quota_tasks }} tasks every {{ current_user.plan.quota_refresh }} seconds)">
-                                </div>
+                                <div class="col-sm-8" id="staticPlan"></div>
                             </div>
 
                             <div class="form-group row">
                                 <label for="staticKey" class="col-sm-4 col-form-label">API key</label>
                                 <div class="col-sm-8">
-                                  <input type="text" readonly class="form-control-plaintext" id="staticKey" value="{{ current_user.apikey }}">
+                                  <input type="text" readonly class="form-control-plaintext" id="staticKey" value="">
                                 </div>
                             </div>
 
@@ -74,6 +72,42 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
+    <script src="/static/assets/js/pages/users.js"></script>
+    <script src="/static/assets/js/pages/plans.js"></script>
 
+    <script>
+    var APIKEY = {{ current_user.apikey | tojson }};
+    API_USERS = {{ url_for("api_blueprint.users_user_list") | tojson }};
+    API_USERS_UPDATE = {{ url_for("api_blueprint.users_user_2") | tojson }};
+    API_PLANS = {{ url_for("api_blueprint.plans_plans") | tojson }};
+
+    function build_view(data, textStatus, jqXHR){
+        $("#staticUsername").val(USER_DATA.username);
+        $("#staticEmail").val(USER_DATA.email);
+        $("#staticKey").val(USER_DATA.apikey);
+        $("#staticRole").val(USER_DATA.role.label);
+
+        // Add Plans buttons:
+        $("#staticPlan").html(get_html_plan_btn(USER_DATA));
+
+        // Attach buttons callback:
+        $("#staticPlan > div > button").each(function(){
+            $(this).on('click', function(){
+                let plan_name = $(this).text();
+                let plan_id;
+                for (let i = 0; i < LIST_OF_PLANS.length; i++) {
+                    if (plan_name === LIST_OF_PLANS[i].label){
+                        plan_id = LIST_OF_PLANS[i].id
+                    }
+                }
+                update_profile({'user_id': USER_DATA['id'], 'plan_id': plan_id}, load_user, build_view);
+            })
+        })
+    }
+
+    $( document ).ready(function() {
+        load_plans().then(load_user).then(build_view);
+    })
+    </script>
 
 {% endblock javascripts %}

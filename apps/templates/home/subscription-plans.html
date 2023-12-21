@@ -11,57 +11,7 @@
 	<!-- [ Main Content ] start -->
 	<div class="pcoded-main-container">
 		<div class="pcoded-content">
-            <div class="row">
-                <div class="col-md-6 col-lg-4">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <i class="fa fa-battery-quarter text-secondary d-block f-40"></i>
-                            <h3 class="m-t-20 text-secondary">Free Plan</h3>
-                            <h5 class="m-t-20">The basics to get started</h5>
-                            <div class="card-body text-lg-start">
-                                <p class="m-b-20"><i class="feather icon-check-circle"></i> 10 runs/day</p>
-                                <p class="m-b-20"><i class="feather icon-circle"></i> Dashboard for runs</p>
-                                <p class="m-b-20"><i class="feather icon-circle"></i> Simulations analyser</p>
-                                <p class="m-b-20"><i class="feather icon-circle"></i> API</p>
-                            </div>
-                            <button class="btn btn-secondary btn-sm btn-round">Subscribe</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <i class="fa fa-battery-half text-success d-block f-40"></i>
-                            <h3 class="m-t-20 text-success">Standard Plan</h3>
-                            <h5 class="m-t-20">Most popular</h5>
-                            <div class="card-body text-lg-start">
-                                <p class="m-b-20"><i class="feather icon-check-circle"></i> 50 runs/day</p>
-                                <p class="m-b-20"><i class="feather icon-check-circle"></i> Dashboard for runs</p>
-                                <p class="m-b-20"><i class="feather icon-circle"></i> Simulations analyser</p>
-                                <p class="m-b-20"><i class="feather icon-circle"></i> API</p>
-                            </div>
-                            <button class="btn btn-success btn-sm btn-round">Subscribe</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <i class="fa fa-battery-full text-info d-block f-40"></i>
-                            <h3 class="m-t-20 text-info">Expert Plan</h3>
-                            <h5 class="m-t-20">Full Virtual Research Environment</h5>
-                            <div class="card-body text-lg-start">
-                                <p class="m-b-20"><i class="feather icon-check-circle"></i> 100 runs/day</p>
-                                <p class="m-b-20"><i class="feather icon-check-circle"></i> Dashboard for runs</p>
-                                <p class="m-b-20"><i class="feather icon-check-circle"></i> Simulations analyser</p>
-                                <p class="m-b-20"><i class="feather icon-check-circle"></i> API</p>
-                            </div>
-                            <button class="btn btn-info btn-sm btn-round">Subscribe</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <div class="row" id="plans"></div>
     </div>
 
 {% endblock content %}
@@ -74,7 +24,110 @@
     <script src="/static/assets/js/pages/simulations-launcher.js"></script>
 
     <script>
-    var API = {{ url_for("api_blueprint.tasks_task_list") | tojson }};
+    var API_PLANS = {{ url_for("api_blueprint.plans_plans") | tojson }};
+    var LIST_OF_PLANS;
+    {%  if current_user.is_authenticated %}
+    var USER_PLAN = "{{ current_user.plan.label }}";
+    var APIKEY = {{ current_user.apikey | tojson }};
+    {%  else %}
+    var USER_PLAN = "";
+    var APIKEY = "";
+    {%  endif %}
+
+    get_html_plan = function(plan_data, selected=false){
+        get_html_feature = function(feat_name, checked=false){
+            let icon;
+            if (checked) {
+                icon = "icon-check-circle";
+            } else {
+                icon = "icon-circle";
+            }
+            return "               <p class='m-b-20'><i class='feather "+icon+"'></i> "+feat_name+"</p>";
+        }
+
+        let color;
+        let bat;
+        let features = [false, false, false];
+        if (plan_data.level == 0) {
+            color = ["secondary", "white"];
+            bat = "quarter";
+        } else if (plan_data.level <= 50) {
+            color = ["success", "white"];
+            features[0] = true;
+            bat = "half";
+        } else if (plan_data.level <= 100) {
+            color = ["info", "white"];
+            features[0] = true;
+            features[1] = true;
+            features[2] = true;
+            bat = "full";
+        } else {
+            color = ["light", "dark"];
+        }
+
+        if (selected){
+            card_border = " border border-danger";
+        } else {
+            card_border = "";
+        }
+
+        html =  "<div class='col-md-6 col-lg-4'>";
+        html += "   <div class='card"+card_border+"'>";
+        html += "       <div class='card-body text-center'>";
+        html += "           <i class='fa fa-battery-"+bat+" text-"+color[0]+" d-block f-40'></i>";
+        html += "           <h3 class='m-t-20 text-"+color[0]+"'>"+plan_data.label+" Plan</h3>";
+        //html += "           <h5 class='m-t-20'>The basics to get started</h5>";
+
+        html += "           <div class='card-body text-lg-start'>";
+        html += "               <p class='m-b-20'><i class='feather icon-check-circle'></i> "+plan_data.quota_tasks+" runs/"+plan_data.quota_refresh+"</p>";
+        html += get_html_feature("Dashboard for runs", features[0]);
+        html += get_html_feature("Simulations analyser", features[1]);
+        html += get_html_feature("API", features[2]);
+        html += "           </div>";
+
+        if (!selected){
+            {%  if current_user.is_authenticated %}
+            let link = "{{ url_for('home_blueprint.user_profile') }}";
+            {%  else %}
+            let link = "{{ url_for('authentication_blueprint.register') }}?plan_id=" + plan_data.id;
+            {% endif %}
+            html += "           <a class='btn btn-"+color[0]+" btn-lg btn-round' href='"+link+"' role='button'>Subscribe</a>";
+        } else {
+            html += "           <a class='btn btn-outline-"+color[0]+" btn-lg btn-round disabled' role='button'>Your current plan</a>";
+        };
+        html += "       </div>";
+        html += "   </div>";
+        html += "</div>";
+
+        return html
+
+    }
+
+    function load_plans(){
+        return $.ajax({
+              url:API_PLANS,
+              type:"GET",
+              contentType:"application/json; charset=utf-8",
+              dataType:"json",
+              success: function(data){
+                  LIST_OF_PLANS = data;
+              }
+        });
+    }
+
+    function build_view(data, textStatus, jqXHR){
+        for (let i = 0; i < LIST_OF_PLANS.length; i++) {
+            let selected = USER_PLAN === LIST_OF_PLANS[i].label;
+            $("#plans").append(get_html_plan(LIST_OF_PLANS[i], selected));
+        }
+    }
+
+
+    $( document ).ready(function() {
+        load_plans().then(build_view);
+    });
+
+
     </script>
 
 

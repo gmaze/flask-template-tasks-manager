@@ -100,15 +100,17 @@ curl -v -X POST \
 
 # Users
 
-## For a user to get its data:
+## GET
+
+### For a user to get its data:
 ```bash
 curl -X 'GET' \
   'http://127.0.0.1:5000/api/1/users/' \
-  -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b' \
+  -H 'X-API-KEY: b09387d5d8d447268d88f8e09e54373g' \
   -H 'accept: application/json'
 ```
 
-## From admin to get all users data:
+### From admin to get all users data:
 ```bash
 curl -X 'GET' \
   'http://127.0.0.1:5000/api/1/users/all' \
@@ -124,18 +126,33 @@ curl -X 'GET' \
   -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b'
 ```
 
-## From admin to get one user data:
+### From admin to get one user data:
 ```bash
 curl -X 'GET' \
-  'http://127.0.0.1:5000/api/1/users/2' \
+  'http://127.0.0.1:5000/api/1/users/3' \
   -H 'X-API-KEY: e128584706e24065995c0b99b042a945' \
   -H 'accept: application/json'
 ```
 
-From any user:
+From any user (error):
 ```bash
 curl -X 'GET' \
   'http://127.0.0.1:5000/api/1/users/2' \
   -H 'accept: application/json' \
   -H 'X-API-KEY: 25fce900e1d64052b9713601335f9a5b'
+```
+
+## PUT
+
+### From a user to update its profile:
+
+```bash
+curl -X 'PUT' \
+  'http://127.0.0.1:5000/api/1/users/' \
+  -H 'accept: application/json' \
+  -H 'X-API-KEY: b09387d5d8d447268d88f8e09e54373g' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "plan_id": 3
+}'
 ```

@@ -57,7 +57,14 @@
                     </div>
                 </li>
             </ul>
-            {% endif %}
+            {%  else %}
+            <ul class="navbar-nav ms-auto">
+                <li>
+                    <a href="{{ url_for('authentication_blueprint.login') }}" class="f-w-400">Sign IN</a>
+                    | <a href="{{ url_for('authentication_blueprint.register') }}" class="f-w-400">Sign UP</a>
+                </li>
+            </ul>
+            {%  endif %}
         </div>
         
     

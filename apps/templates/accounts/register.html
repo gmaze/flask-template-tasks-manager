@@ -132,7 +132,7 @@
                 active_this_plan(this.id)
             });
         })
-        active_this_plan('planBtn_'+3);
+        active_this_plan('planBtn_'+{{ selected_plan_id | safe }});
     });
 
 </script>

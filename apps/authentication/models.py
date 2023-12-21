@@ -198,6 +198,31 @@ class Users(db.Model, UserMixin, TimestampMixin):
         params['tasks'] = self.tasks_desc_to_dict
         return params
 
+    def update(self, data):
+        # print('kwargs:', data)
+
+        for property, value in data.items():
+            # depending on whether value is an iterable or not, we must
+            # unpack its value (when **kwargs is request.form, some values
+            # will be a 1-element list)
+            if hasattr(value, '__iter__') and not isinstance(value, str):
+                # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
+                value = value[0]
+
+            if property == 'password':
+                value = hash_pass(value)  # we need bytes here (not plain str)
+
+            # print('Updating: %s=%s' % (property, str(value)))
+
+            if property == 'plan_id':
+                plan = db.session.query(SubscriptionPlans).filter_by(id=0).first()
+                if plan:
+                    self.plan_id = plan.id
+
+            setattr(self, property, value)
+        db.session.commit()
+
+        return self.find_by_id(self.id)
 
 
 @login_manager.user_loader
