@@ -39,7 +39,7 @@ else:
 
 # Absolute path to repository:
 REPOSITORY_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-print('REPOSITORY_ROOT', REPOSITORY_ROOT)
+# print('REPOSITORY_ROOT', REPOSITORY_ROOT)
 
 
 class SysTemMonitor:

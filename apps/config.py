@@ -56,7 +56,7 @@ class Config(object):
         SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3') 
 
     #
-    REFRESH_MONITORS = 5  # In seconds
+    REFRESH_MONITORS = 1  # In seconds
 
 class ProductionConfig(Config):
     DEBUG = False

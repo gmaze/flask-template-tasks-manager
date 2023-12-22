@@ -18,14 +18,15 @@
                     <div class="card seo-card overflow-hidden">
                         <div class="card-body seo-statustic">
                             <i class="feather icon-cpu f-20 text-c-red"></i>
-                            <h5 class="mb-1">65%</h5>
-                            <p>CPU</p>
+                            <h5 class="mb-1" id="cpu-current"></h5>
+                            <p id="cpu-label"></p>
                         </div>
                         <div class="seo-chart">
-                            <div id="seo-card1"></div>
+                            <div id="cpu-card"></div>
                         </div>
                     </div>
                 </div>
+                
                 <div class="col-md-12 col-lg-4">
                     <div class="card seo-card overflow-hidden">
                         <div class="card-body seo-statustic">
@@ -69,5 +70,110 @@
 
     <!-- custom-chart js -->
     <script src="/static/assets/js/pages/dashboard.js"></script>
+
+    <script>
+
+    init_monitor_cpu = function(div_id, labels, colors, offsetY=0){
+        var options1 = {
+            chart: {
+                type: 'area',
+                height: 145,
+                sparkline: {
+                    enabled: true
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            colors: ["#ff5370"],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'dark',
+                    gradientToColors: ['#ff869a'],
+                    shadeIntensity: 1,
+                    type: 'horizontal',
+                    opacityFrom: 1,
+                    opacityTo: 0.8,
+                    stops: [0, 100, 100, 100]
+                },
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2,
+            },
+            series: [],
+            yaxis: {
+               min: 0,
+               max: 100,
+            },
+            tooltip: {
+                fixed: {
+                    enabled: false
+                },
+                x: {
+                    show: false
+                },
+                y: {
+                    title: {
+                        formatter: function(seriesName) {
+                            return 'CPU Usage '
+                        }
+                    }
+                },
+                marker: {
+                    show: false
+                }
+            },
+            noData: {
+                text: 'Waiting for data...',
+            },
+        }
+        var chart = new ApexCharts(document.querySelector("#"+div_id), options1);
+        chart.render();
+        return chart
+    }
+
+
+
+    fill_in_cpu_card = function(api, this_graphe) {
+        $.ajax({
+            url: api + "?page=1",
+            type: "GET",
+            headers: {'X-API-KEY': APIKEY},
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                //console.log(data['data'])
+                $("#cpu-label").html(data['label']);
+                $("#cpu-current").html(data['data'].slice(-1)[0]['value']+data['unit']);
+                let L = data['data'];
+                let D = {};
+                Object.keys(L[0]).forEach(k => {
+                    D[k] = L.map(o => o[k]);
+                });
+                //console.log(D);
+                this_graphe.updateSeries([{data: D['value'].reverse()}]);
+            }
+        })
+    };
+
+    var API_CPU = {{ url_for("api_blueprint.monitors_default_cpu") | tojson }};
+    var APIKEY = {{ current_user.apikey | tojson }};
+    var monitor1;
+
+    var RefreshTasksList = window.setInterval(function(){
+        fill_in_cpu_card(API_CPU, monitor1);
+    }, 1000);
+
+
+    $( document ).ready(function() {
+        monitor1 = init_monitor_cpu("cpu-card");
+        fill_in_cpu_card(API_CPU, monitor1);
+    })
+
+    </script>
+
+
 
 {% endblock javascripts %}
