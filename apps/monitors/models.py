@@ -31,7 +31,7 @@ class Monitor_proto:
             setattr(self, property, value)
 
     def __repr__(self):
-        summary = ["<Monitor.%i>" % self.id]
+        summary = ["<Monitor>"]
         summary.append("Label: %s" % self.label)
         summary.append("Unit: %i" % self.unit)
         return "\n".join(summary)
@@ -48,15 +48,17 @@ class Monitor_proto:
         min = self.query(self.value, func.min(self.value))
         return min, max
 
-    def to_dict(self):
-        params = {}
-        for k in ['id', 'label', 'unit']:
-            params[k] = getattr(self, k)
-        return params
-
 
 @dataclass
 class Monitor_CPU(db.Model, TimestampMixin, Monitor_proto):
     __tablename__ = 'Monitor_CPU_table'
     label = "System CPU"
     unit = "%"
+
+@dataclass
+class Monitor_VMEM(db.Model, TimestampMixin, Monitor_proto):
+    __tablename__ = 'Monitor_VMEM_table'
+    label = "Virtual Memory"
+    unit = "Mb"
+    total = db.Column(db.Float)
+    available = db.Column(db.Float)

@@ -26,31 +26,19 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="col-md-12 col-lg-4">
                     <div class="card seo-card overflow-hidden">
                         <div class="card-body seo-statustic">
-                            <i class="feather icon-server f-20 text-c-red"></i>
-                            <h5 class="mb-1">5%</h5>
-                            <p>Memory </p>
+                            <i class="feather icon-server f-20 text-success"></i>
+                            <h5 class="mb-1" id="vmem-current"></h5>
+                            <p id="vmem-label"></p>
                         </div>
                         <div class="seo-chart">
-                            <div id="seo-card2"></div>
+                            <div id="vmem-card"></div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-12 col-lg-4">
-                    <div class="card seo-card overflow-hidden">
-                        <div class="card-body seo-statustic">
-                            <i class="feather icon-save f-20 text-c-red"></i>
-                            <h5 class="mb-1">15%</h5>
-                            <p>Simulations cache</p>
-                        </div>
-                        <div class="seo-chart">
-                            <div id="seo-card3"></div>
-                        </div>
-                    </div>
-                </div>
+
                 <!-- statistic end -->
 
 
@@ -69,11 +57,15 @@
     <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
 
     <!-- custom-chart js -->
-    <script src="/static/assets/js/pages/dashboard.js"></script>
+{#    <script src="/static/assets/js/pages/dashboard.js"></script>#}
 
     <script>
 
-    init_monitor_cpu = function(div_id, labels, colors, offsetY=0){
+    init_monitor = function(div_id,
+                            labels,
+                            colors,
+                            ylim=[0,100],
+                            ){
         var options1 = {
             chart: {
                 type: 'area',
@@ -85,12 +77,12 @@
             dataLabels: {
                 enabled: false
             },
-            colors: ["#ff5370"],
+            colors: [colors[0]],
             fill: {
                 type: 'gradient',
                 gradient: {
                     shade: 'dark',
-                    gradientToColors: ['#ff869a'],
+                    gradientToColors: [colors[1]],
                     shadeIntensity: 1,
                     type: 'horizontal',
                     opacityFrom: 1,
@@ -104,8 +96,8 @@
             },
             series: [],
             yaxis: {
-               min: 0,
-               max: 100,
+               min: ylim[0],
+               max: ylim[1],
             },
             tooltip: {
                 fixed: {
@@ -117,7 +109,7 @@
                 y: {
                     title: {
                         formatter: function(seriesName) {
-                            return 'CPU Usage '
+                            return labels
                         }
                     }
                 },
@@ -134,7 +126,26 @@
         return chart
     }
 
+    function humanFileSize(bytes, si=false, dp=1) {
+        const thresh = si ? 1000 : 1024;
 
+        if (Math.abs(bytes) < thresh) {
+            return bytes + ' B';
+        }
+
+        const units = si
+        ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+        : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+        let u = -1;
+        const r = 10**dp;
+
+        do {
+            bytes /= thresh;
+            ++u;
+        } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+        return bytes.toFixed(dp) + ' ' + units[u];
+    }
 
     fill_in_cpu_card = function(api, this_graphe) {
         $.ajax({
@@ -158,18 +169,48 @@
         })
     };
 
+    fill_in_vmem_card = function(api, this_graphe) {
+        $.ajax({
+            url: api + "?page=1",
+            type: "GET",
+            headers: {'X-API-KEY': APIKEY},
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                let percent = data['data'].slice(-1)[0]['value'];
+                let total = data['data'].slice(-1)[0]['total'];
+                let used = total*percent/100*1e6;
+
+                $("#vmem-label").html(data['label'] + " (" +humanFileSize(total*1e6)+ ")");
+                $("#vmem-current").html(humanFileSize(used));
+
+                let L = data['data'];
+                let D = {};
+                Object.keys(L[0]).forEach(k => {
+                    D[k] = L.map(o => o[k]);
+                });
+                this_graphe.updateSeries([{data: D['value'].reverse()}]);
+            }
+        })
+    };
+
     var API_CPU = {{ url_for("api_blueprint.monitors_default_cpu") | tojson }};
+    var API_VMEM = {{ url_for("api_blueprint.monitors_default_vmem") | tojson }};
     var APIKEY = {{ current_user.apikey | tojson }};
     var monitor1;
+    var monitor2;
 
     var RefreshTasksList = window.setInterval(function(){
         fill_in_cpu_card(API_CPU, monitor1);
+        fill_in_vmem_card(API_VMEM, monitor2);
     }, 1000);
 
 
     $( document ).ready(function() {
-        monitor1 = init_monitor_cpu("cpu-card");
+        monitor1 = init_monitor("cpu-card", "%", ['#ff5370', '#ff869a'], [0,100]);
+        monitor2 = init_monitor("vmem-card", "%", ['#53ff70', '#86ff9a'], [0, 100]);
         fill_in_cpu_card(API_CPU, monitor1);
+        fill_in_vmem_card(API_VMEM, monitor2);
     })
 
     </script>
