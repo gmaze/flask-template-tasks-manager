@@ -77,7 +77,6 @@ def read_data_for_pid(pid):
         return {'status': status, 'progress': progress, 'result': result}
 
 
-
 def load_params(data):
     data = json.loads(data)
     log.debug(data)
@@ -90,7 +89,6 @@ def dummy_task(data):
         time.sleep(1)
         log.info("progress: %0.1f" % (i*100/TimeLapse))
     return int(time.time()) & 0x1
-
 
 
 if __name__ == '__main__':
