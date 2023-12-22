@@ -66,6 +66,7 @@ function floatchart() {
         new ApexCharts(document.querySelector("#seo-card1"), options1).render();
     })();
     // [ seo-card1 ] end
+
     // [ seo-card2 ] start
     (function () {
         var options1 = {
@@ -125,6 +126,7 @@ function floatchart() {
         new ApexCharts(document.querySelector("#seo-card2"), options1).render();
     })();
     // [ seo-card2 ] end
+
     // [ seo-card3 ] start
     (function () {
         var options1 = {

@@ -7,8 +7,7 @@
 from flask import Blueprint
 
 blueprint = Blueprint(
-    'simulations_blueprint',
+    'tasks_blueprint',
     __name__,
-    url_prefix='/simulations'
+    url_prefix='/tasks'
 )
-

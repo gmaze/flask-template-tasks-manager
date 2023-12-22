@@ -25,7 +25,7 @@ blueprint = Blueprint(
 api = Api(blueprint,
             title='VirtualFleet-Recovery',
             version='1.0',
-            description='An API to make VirtualFleet-Recovery simulations')
+            description='An API to make VirtualFleet-Recovery tasks')
 
 api.add_namespace(ns_tasks)
 api.add_namespace(ns_users)

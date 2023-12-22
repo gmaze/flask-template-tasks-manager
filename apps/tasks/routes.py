@@ -11,8 +11,8 @@ from flask_login import (
 )
 
 from apps import db
-from apps.simulations import blueprint
-from apps.simulations.forms import SimulationForm
+from apps.tasks import blueprint
+from apps.tasks.forms import SimulationForm
 from apps.authentication.models import Users, role_required
 from apps.apis.util import TasksManager
 

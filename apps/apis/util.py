@@ -320,6 +320,7 @@ def apikey_required(view_function):
             abort(401, "Invalid API key")
     return decorated_function
 
+
 def apikey_admin_required(view_function):
     """A Decorator ensuring API-key corresponds to an Admin role level"""
     @wraps(view_function)
