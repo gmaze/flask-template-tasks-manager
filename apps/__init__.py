@@ -10,6 +10,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
 
+
 db = SQLAlchemy()
 login_manager = LoginManager()
 
@@ -23,7 +24,7 @@ def register_blueprints(app):
     from .apis import blueprint as api  # Cannot be imported before db.init_app
     app.register_blueprint(api, url_prefix='/api/1')
 
-    for module_name in ('authentication', 'home', 'tasks', 'subscriptions', 'admin'):
+    for module_name in ('authentication', 'home', 'tasks', 'subscriptions', 'admin', 'monitors'):
         module = import_module('apps.{}.routes'.format(module_name))
         app.register_blueprint(module.blueprint)
 
@@ -100,6 +101,14 @@ def insert_in_database(app):
             print('> Error: DBMS Exception: ' + str(e))
 
 
+def start_monitors(app):
+    from .monitors.src import SysTemMonitor
+
+    # Demarrage du monitoring du serveur:
+    # (creation d'un thread qui sera terminé automatiquement en meme temps que l'appli Flask)
+    SysTemMonitor(app=app, db=db, refresh_rate=app.config['REFRESH_MONITORS']).start()
+
+
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
@@ -107,4 +116,5 @@ def create_app(config):
     register_blueprints(app)
     configure_database(app)
     insert_in_database(app)
+    start_monitors(app)
     return app

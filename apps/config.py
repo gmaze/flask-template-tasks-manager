@@ -54,7 +54,10 @@ class Config(object):
 
         # This will create a file in <app> FOLDER
         SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3') 
-    
+
+    #
+    REFRESH_MONITORS = 5  # In seconds
+
 class ProductionConfig(Config):
     DEBUG = False
 
