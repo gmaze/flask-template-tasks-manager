@@ -35,7 +35,7 @@ elif system() == "Linux":
     from .sys_linux import read_save_data
 
 else:
-    raise ValueError("Votre systeme n'est pas encore supporte ! ['%s']" % system())
+    raise ValueError("Unsupported OS ! ['%s']" % system())
 
 # Absolute path to repository:
 REPOSITORY_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

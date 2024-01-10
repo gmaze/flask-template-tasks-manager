@@ -45,6 +45,7 @@ user = api.model("UserProfile", {
     'username': fields.String(description='User name (login)'),
     'email': fields.String(description='User email'),
     'apikey': fields.String(description='APIkey'),
+    'disk_usage': fields.Integer(description='User disk usage in bytes'),
 
     'role': fields.Nested(role),
     'subscription_plan': fields.Nested(subscription_plan),

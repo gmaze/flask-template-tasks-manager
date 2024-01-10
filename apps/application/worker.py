@@ -19,6 +19,7 @@ def logfile():
     LOGFILE = os.path.sep.join([BASEDIR, "logs", "worker.log"])
     return LOGFILE
 
+
 def read_status_for_pid(pid):
     pattern = ("INFO / worker / %i / status: " % pid)
     # print(pattern)

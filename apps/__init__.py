@@ -29,6 +29,11 @@ def register_blueprints(app):
         app.register_blueprint(module.blueprint)
 
 
+def start_monitors(app):
+    from .monitors.src import SysTemMonitor
+    SysTemMonitor(app=app, db=db, refresh_rate=app.config['REFRESH_MONITORS']).start()
+
+
 def configure_database(app):
 
     @app.before_first_request
@@ -46,6 +51,7 @@ def configure_database(app):
             print('> Fallback to SQLite ')
             db.create_all()
 
+        start_monitors(app)
 
     @app.teardown_request
     def shutdown_session(exception=None):
@@ -101,13 +107,6 @@ def insert_in_database(app):
             print('> Error: DBMS Exception: ' + str(e))
 
 
-def start_monitors(app):
-    from .monitors.src import SysTemMonitor
-
-    # Demarrage du monitoring du serveur:
-    # (creation d'un thread qui sera terminé automatiquement en meme temps que l'appli Flask)
-    SysTemMonitor(app=app, db=db, refresh_rate=app.config['REFRESH_MONITORS']).start()
-
 
 def create_app(config):
     app = Flask(__name__)
@@ -116,5 +115,4 @@ def create_app(config):
     register_blueprints(app)
     configure_database(app)
     insert_in_database(app)
-    start_monitors(app)
     return app

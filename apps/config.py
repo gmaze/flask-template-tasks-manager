@@ -57,6 +57,7 @@ class Config(object):
 
     #
     REFRESH_MONITORS = 1  # In seconds
+    STORAGE_PATH = os.path.sep.join([basedir, "static", "results"])
 
 class ProductionConfig(Config):
     DEBUG = False

@@ -3,9 +3,12 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+import os
+from pathlib import Path
+
 from flask_login import UserMixin, current_user
 from typing import List
-from flask import abort
+from flask import abort, current_app
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped
@@ -15,6 +18,7 @@ from sqlalchemy import DateTime
 from datetime import date, datetime, timedelta
 import uuid
 from functools import wraps
+from werkzeug.utils import secure_filename
 
 from apps import db, login_manager
 from apps.authentication.util import hash_pass
@@ -107,6 +111,10 @@ class Users(db.Model, UserMixin, TimestampMixin):
             default_plan = db.session.query(SubscriptionPlans).filter_by(level=0).first()
             self.plan_id = default_plan.id
 
+        # Make sure this user has a storage path:
+        p = os.path.join(current_app.config['STORAGE_PATH'], secure_filename(self.username))
+        Path(p).mkdir(exist_ok=True)
+
     def __repr__(self):
         summary = ["<Users.%i>" % self.id]
         summary.append("Created: %s" % self.created)
@@ -116,6 +124,7 @@ class Users(db.Model, UserMixin, TimestampMixin):
         summary.append("Role ID: %i" % self.role_id)
         summary.append("Plan ID: %i" % self.plan_id)
         summary.append("API key: %s" % self.apikey)
+        summary.append("Local storage: %s (%i bytes)" % (self.storage_path, self.storage_usage))
         if self.tasks:
             summary.append("Tasks ID: %s" % (",".join([str(t.id) for t in self.tasks])))
         return "\n".join(summary)
@@ -196,6 +205,7 @@ class Users(db.Model, UserMixin, TimestampMixin):
         params['subscription_plan'] = self.plan.to_dict()
         # params['tasks'] = [t.id for t in self.tasks]
         params['tasks'] = self.tasks_desc_to_dict
+        params['disk_usage'] = self.storage_usage
         return params
 
     def update(self, data):
@@ -223,6 +233,15 @@ class Users(db.Model, UserMixin, TimestampMixin):
         db.session.commit()
 
         return self.find_by_id(self.id)
+
+    @property
+    def storage_path(self):
+        return os.path.join(current_app.config['STORAGE_PATH'], secure_filename(self.username))
+
+    @property
+    def storage_usage(self):
+        root_directory = Path(self.storage_path)
+        return sum(f.stat().st_size for f in root_directory.glob('**/*') if f.is_file())
 
 
 @login_manager.user_loader

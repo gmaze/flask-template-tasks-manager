@@ -15,6 +15,6 @@ from apps.monitors import blueprint
 
 
 @blueprint.route('/', methods=['GET'])
-@login_required
 def default_route():
-    return redirect(url_for('home_blueprint.index'))
+    # return redirect(url_for('home_blueprint.index'))
+    return render_template('home/monitors.html')

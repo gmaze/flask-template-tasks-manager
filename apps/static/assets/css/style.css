@@ -27867,12 +27867,13 @@ body.box-layout .pcoded-navbar.theme-horizontal ~ .pcoded-header {
     background-color: #fff;
 }
 
-.seo-card .seo-statustic {
+.seo-card .seo-statistic {
     position: absolute;
+    z-index: 1000;
 }
 
-.seo-card .seo-statustic + .seo-chart {
-    margin-top: 60px;
+.seo-card .seo-statistic + .seo-chart {
+    margin-top: 0px;
 }
 
 #seo-card1,
