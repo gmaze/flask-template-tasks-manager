@@ -137,8 +137,8 @@ fill_in_vmem_card = function(api, this_graphe) {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (data) {
-            let percent = data['data'].slice(-1)[0]['value'];
-            let total = data['data'].slice(-1)[0]['total'];
+            let percent = data['data'].slice(0)[0]['value'];
+            let total = data['data'].slice(0)[0]['total'];
             let used = total*percent/100*1e6;
 
             $("#vmem-label").html(data['label'] + " (" +humanFileSize(total*1e6)+ ")");

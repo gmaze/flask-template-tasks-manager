@@ -1,12 +1,7 @@
-#!/bin/env python
-# -*coding: UTF-8 -*-
-#
-# HELP
-#
-# Created by gmaze on 27/11/2023
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, IntegerField, IntegerRangeField
-from wtforms.validators import Email, DataRequired
+from wtforms import StringField, IntegerRangeField
+from wtforms.validators import DataRequired
+
 
 class SimulationForm(FlaskForm):
     label = StringField('Label (simulation nickname)',

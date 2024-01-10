@@ -50,6 +50,7 @@ def read_progress_for_pid(pid):
         return progress
 
 
+# Mandatory function !
 def read_data_for_pid(pid):
     pattern1 = ("INFO / worker / %i / status: " % pid)
     pattern2 = ("INFO / worker / %i / progress: " % pid)
@@ -102,10 +103,9 @@ if __name__ == '__main__':
         handlers=[logging.FileHandler(logfile(), mode='a')]
     )
 
-    # Read arguments as a json string
     # sys.argv[0]  # this script name
     if len(sys.argv) == 2:
-        data = load_params(sys.argv[1])
+        data = load_params(sys.argv[1])  # Read arguments as a json string
         log.info("status: running")
         try:
             outcome = dummy_task(data)

@@ -43,8 +43,9 @@ $ conda activate
 Set Up Flask Environment
 
 ```bash
-$ export FLASK_APP=run.py
-$ export FLASK_ENV=development
+export FLASK_APP=run.py
+export FLASK_DEBUG=1
+\rm apps/logs/monitor_lock.log
 ```
 
 Start the app
@@ -67,16 +68,47 @@ The project is coded using blueprints, app factory pattern, dual configuration p
    |
    |-- apps/
    |    |
-   |    |-- home/                           # A simple app that serve HTML files
-   |    |    |-- routes.py                  # Define app routes
+   |    |-- home/                           # An app that serve HTML files
+   |    |    |-- routes.py                  # Define routes
    |    |
    |    |-- authentication/                 # Handles auth routes (login and register)
-   |    |    |-- routes.py                  # Define authentication routes  
+   |    |    |-- routes.py                  # Define routes  
    |    |    |-- models.py                  # Defines models  
    |    |    |-- forms.py                   # Define auth forms (login and register) 
+   |    |    |-- util.py                    # Useful functions for authentication
+   |    |
+   |    |-- tasks/                          # Handles tasks routes
+   |    |    |-- routes.py                  # Define routes
+   |    |    |-- models.py                  # Defines models  
+   |    |    |-- forms.py                   # Define tasks submission forms 
+   |    |
+   |    |-- subscriptions/                  # Handles subscriptions routes
+   |    |    |-- routes.py                  # Define routes
+   |    |    |-- models.py                  # Defines models  
+   |    |
+   |    |-- monitors/                       # Handles monitors (routes and process)
+   |    |    |-- routes.py                  # Define routes
+   |    |    |-- models.py                  # Defines models  
+   |    |    |-- src/                       # Monitoring methods for each OS
+   |    |    |    |-- __init__.html         # Define Monitor Facade
+   |    |    |    |-- sys_darwin.html       # Mac OS component
+   |    |    |    |-- sys_linux.html        # Linux component
+   |    |
+   |    |-- admin/                          # Handles admin panel routes
+   |    |    |-- routes.py                  # Define routes
+   |    |
+   |    |-- apis/                           # Handles REST-API routes
+   |    |    |-- util.py                    # Useful functions for REST-API
+   |    |    |-- namespace_monitors.py      # Handles API 'monitors' entry
+   |    |    |-- namespace_plans.py         # Handles API 'plans' entry
+   |    |    |-- namespace_tasks.py         # Handles API 'tasks' entry
+   |    |    |-- namespace_users.py         # Handles API 'users' entry
+   |    |
+   |    |-- application/                    # Handles specifics for this application
+   |    |    |-- worker.py                  # Receive 'tasks' API or 'tasks/launcher' form data and execute application script 
    |    |
    |    |-- static/
-   |    |    |-- <css, JS, images>          # CSS files, Javascripts files
+   |    |    |-- <css, JS, images>          # CSS files, Javascript files
    |    |
    |    |-- templates/                      # Templates used to render pages
    |    |    |-- includes/                  # HTML chunks and components
@@ -93,10 +125,21 @@ The project is coded using blueprints, app factory pattern, dual configuration p
    |    |    |    |-- login.html            # Login page
    |    |    |    |-- register.html         # Register page
    |    |    |
+   |    |    |-- admin/                     # App. admin pages
+   |    |    |    |-- tasks.html            # Tasks admin panel
+   |    |    |    |-- users.html            # Users admin panel
+   |    |    |
+   |    |    |-- tasks/                     # App. admin pages
+   |    |    |    |-- launcher.html         # Tasks admin panel
+   |    |    |
    |    |    |-- home/                      # UI Kit Pages
-   |    |         |-- index.html            # Index page
-   |    |         |-- 404-page.html         # 404 page
-   |    |         |-- *.html                # All other pages
+   |    |    |    |-- index.html            # Index page
+   |    |    |    |-- page-404.html         # 404 page
+   |    |    |    |-- profile.html          # User profile page
+   |    |    |    |-- subscription-plans.html  # Describe all available subscription plans
+   |    |    |    |-- monitors.html         # Server monitoring page
+   |    |    |    |-- *.html                # All other pages
+
    |    |    
    |  config.py                             # Set up the app
    |    __init__.py                         # Initialize the app

@@ -16,7 +16,7 @@ import psutil
 from typing import Union, List
 from sqlalchemy.orm.scoping import scoped_session
 
-from apps.apis.models import Tasks as dbTasks
+from apps.tasks.models import Tasks as dbTasks
 from apps.application import read_data_for_pid
 from apps.authentication.models import Users
 

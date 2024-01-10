@@ -41,17 +41,17 @@ def default_route():
         if this_user.tasks_desc_to_dict['quota_left'] > 0:
             TasksManager(db.session).create(payload)
         else:
-            return render_template('simulations/launcher.html',
+            return render_template('tasks/launcher.html',
                                    form=SimulationForm(request.form),
                                    launched=False,
                                    error="You reached your subscription plan tasks limit ! Please upgrade or wait for %i seconds to submit a new task" % this_user.tasks_desc_to_dict['retry-after']
                                    )
 
-        return render_template('simulations/launcher.html',
+        return render_template('tasks/launcher.html',
                                form=SimulationForm(request.form),
                                launched=True,
                                )
 
-    return render_template('simulations/launcher.html',
+    return render_template('tasks/launcher.html',
                            form=simulation_form)
 
