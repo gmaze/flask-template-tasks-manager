@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Simulations page {% endblock %}
+{% block title %} Tasks {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
@@ -42,16 +42,16 @@
 				<!-- [ Create a new simulation-page ] start -->
                 <div class="col-md-12 col-xl-6">
                     <div class="card">
-                        <div class="card-header"> <h5>Create a new simulation</h5> </div>
+                        <div class="card-header"> <h5>Submit a new task to server</h5> </div>
                         <div class="card-body" style="min-height: 245px;">
                             <form method="post" action="" id="launch_form">
                                 {{ form.hidden_tag() }}
                                 <div class="input-group mb-4">
                                     <span class="input-group-text"><i class="feather icon-type"></i></span>
-                                    {{ form.label(placeholder="Simulation Label", class="form-control") }}
+                                    {{ form.label(placeholder="Task Label", class="form-control") }}
                                 </div>
                                 <div class="input-group mb-4">
-                                    <span class="input-group-text"><i class="feather icon-life-buoy"></i>&ensp;Number of virtual floats</span>
+                                    <span class="input-group-text"><i class="feather icon-life-buoy"></i>&ensp;Task dummy parameter</span>
                                     <span class="form-control" id="nfloats_value"></span>
                                     {{ form.nb_floats(class="form-range", min="100", max="4000", step="10") }}
                                 </div>
@@ -72,7 +72,7 @@
                                 <div class="card-body bg-patern">
                                     <div class="row">
                                         <div class="col-auto">
-                                            <span>Simulations</span>
+                                            <span>Tasks</span>
                                         </div>
                                         <div class="col text-end">
                                             <h2 class="mb-0" id="tasks_count_total"></h2>
@@ -132,7 +132,7 @@
 				<div class="col-md-12">
 					<div class="card table-card">
 						<div class="card-header">
-							<h5>List of simulations</h5>
+							<h5>Your list of tasks</h5>
 						</div>
 						<div class="card-body">
                             <div class="table-responsive">
@@ -143,7 +143,7 @@
                                                 <th><span>Tasks ID</span></th>
                                                 <th><span>User</span></th>
                                                 <th><span>Status</span></th>
-                                                <th><span>Number of floats</span></th>
+                                                <th><span>Dummy parameter</span></th>
                                                 <th><span>Label</span></th>
                                                 <th><span>Actions</span></th>
                                             </tr>
@@ -170,17 +170,17 @@
 {% block javascripts %}
 
     <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
-    <script src="/static/assets/js/pages/simulations-launcher.js"></script>
+    <script src="/static/assets/js/pages/launcher.js"></script>
 
     <script>
-    var API_TASKS = {{ url_for("api_blueprint.tasks_task_2") | tojson }};
+    API_TASKS = {{ url_for("api_blueprint.tasks_task_2") | tojson }};
     var API_USERS = {{ url_for("api_blueprint.users_user_2") | tojson }};
     var APIKEY = {{ current_user.apikey | tojson }};
 
     var RefreshTasksList = window.setInterval(function(){
         list_tasks(API_TASKS);
         fill_in_user_cards(API_USERS, donut1, donut2);
-    }, 2000);
+    }, 1000);
 
     var donut1;
     var donut2;

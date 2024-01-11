@@ -66,7 +66,7 @@ class Monitor_VMEM(db.Model, TimestampMixin, Monitor_proto):
 @dataclass
 class Monitor_DISK(db.Model, TimestampMixin, Monitor_proto):
     __tablename__ = 'Monitor_DISK_table'
-    label = "Disk Usage"
+    label = "Total Disk Usage"
     unit = "Mb"
     total = db.Column(db.Float)
     available = db.Column(db.Float)

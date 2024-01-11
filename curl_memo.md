@@ -9,7 +9,7 @@ curl -X 'POST' \
   -H 'X-API-KEY: e70928e4ac1f4f1f8be06089c7d4cc0e' \
   -H 'Content-Type: application/json' \
   -d '{
-  "nfloats": 120,
+  "nfloats": 10,
   "label": ""
 }'
 ```

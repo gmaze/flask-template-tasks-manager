@@ -26,7 +26,7 @@
 				<div class="col-md-12">
 					<div class="card table-card">
 						<div class="card-header">
-							<h5>List of simulations</h5>
+							<h5>List of tasks</h5>
 						</div>
 						<div class="card-body">
                             <div class="table-responsive">
@@ -37,7 +37,7 @@
                                                 <th><span>Tasks ID</span></th>
                                                 <th><span>User</span></th>
                                                 <th><span>Status</span></th>
-                                                <th><span>Number of floats</span></th>
+                                                <th><span>Dummy parameter</span></th>
                                                 <th><span>Label</span></th>
                                                 <th><span>Actions</span></th>
                                             </tr>
@@ -64,7 +64,7 @@
 {% block javascripts %}
 
     <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
-    <script src="/static/assets/js/pages/simulations-launcher.js"></script>
+    <script src="/static/assets/js/pages/launcher.js"></script>
 
     <script>
     var API_TASKS = {{ url_for("api_blueprint.tasks_task_list") | tojson }};
