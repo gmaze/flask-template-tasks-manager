@@ -13,46 +13,35 @@
             <!-- [ Main Content ] start -->
             <div class="row">
 
-                <!-- statistic start -->
-                <div class="col-md-12 col-lg-4">
-                    <div class="card seo-card overflow-hidden">
-                        <div class="card-body seo-statistic">
-                            <i class="feather icon-cpu f-20 text-c-red"></i>
-                            <h5 class="mb-1" id="cpu-current"></h5>
-                            <p id="cpu-label"></p>
-                        </div>
-                        <div class="seo-chart">
-                            <div id="cpu-card"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-12 col-lg-4">
-                    <div class="card seo-card overflow-hidden">
-                        <div class="card-body seo-statistic">
-                            <i class="feather icon-server f-20 text-success"></i>
-                            <h5 class="mb-1" id="vmem-current"></h5>
-                            <p id="vmem-label"></p>
-                        </div>
-                        <div class="seo-chart">
-                            <div id="vmem-card"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-12 col-lg-4">
-                    <div class="card seo-card overflow-hidden">
-                        <div class="card-body seo-statistic">
-                            <i class="feather icon-save f-20 text-c-blue"></i>
-                            <h5 class="mb-1" id="du-current"></h5>
-                            <p id="du-label"></p>
-                        </div>
-                        <div class="seo-chart">
-                            <div id="du-card"></div>
-                        </div>
-                    </div>
-                </div>
+				<!-- [ sample-page ] start -->
+				<div class="col-sm-12">
+					<div class="card">
 
-                <!-- statistic end -->
-
+						<div class="card-header">
+							<h5>Hello card</h5>
+							<div class="card-header-right">
+								<div class="btn-group card-option">
+									<button type="button" class="btn dropdown-toggle btn-icon" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<i class="feather icon-more-horizontal"></i>
+									</button>
+									<ul class="list-unstyled card-option dropdown-menu dropdown-menu-end">
+										<li class="dropdown-item full-card"><a href="#"><span><i class="feather icon-maximize"></i> maximize</span><span style="display:none"><i class="feather icon-minimize"></i> Restore</span></a></li>
+										<li class="dropdown-item minimize-card"><a href="#"><span><i class="feather icon-minus"></i> collapse</span><span style="display:none"><i class="feather icon-plus"></i> expand</span></a></li>
+										<li class="dropdown-item reload-card"><a href="#"><i class="feather icon-refresh-cw"></i> reload</a></li>
+										<li class="dropdown-item close-card"><a href="#"><i class="feather icon-trash"></i> remove</a></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<div class="card-body">
+							<p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+								aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+								officia deserunt mollit anim id est laborum."
+							</p>
+						</div>
+					</div>
+				</div>
+				<!-- [ sample-page ] end -->
 
             </div>
             <!-- [ Main Content ] end -->
@@ -65,22 +54,41 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
-    <script>
-    var API_CPU = {{ url_for("api_blueprint.monitors_default_cpu") | tojson }};
-    var API_VMEM = {{ url_for("api_blueprint.monitors_default_vmem") | tojson }};
-    var API_DISK = {{ url_for("api_blueprint.monitors_default_du") | tojson }};
-    {% if current_user.is_authenticated %}
-    var APIKEY = {{ current_user.apikey | tojson }};
-    {%  else %}
-    var APIKEY = "";
-    {%  endif %}
-    </script>
-
     <!-- Apex Chart -->
     <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
 
     <!-- custom-chart js -->
     <script src="/static/assets/js/monitors.js"></script>
 
+    <script>
+    API_CPU = {{ url_for("api_blueprint.monitors_default_cpu") | tojson }};
+    API_VMEM = {{ url_for("api_blueprint.monitors_default_vmem") | tojson }};
+    API_DISK = {{ url_for("api_blueprint.monitors_default_du") | tojson }};
+    {% if current_user.is_authenticated %}
+    var APIKEY = {{ current_user.apikey | tojson }};
+    {%  else %}
+    var APIKEY = "";
+    {%  endif %}
+
+    var RefreshTasksList = window.setInterval(function(){
+        fill_in_cpu_card(API_CPU, monitor1);
+        fill_in_vmem_card(API_VMEM, monitor2);
+    }, 1000);
+
+    var RefreshTasksList = window.setInterval(function(){
+        fill_in_du_card(API_DISK, monitor3);
+    }, 5000);
+
+
+    $( document ).ready(function() {
+        monitor1 = init_monitor("cpu-card", "%", ['#ff5370', '#ff869a'], [0,100]);
+        monitor2 = init_monitor("vmem-card", "%", ['#53ff70', '#86ff9a'], [0, 100]);
+        monitor3 = init_monitor("du-card", "%", ['#4099ff', '#4099ff'], [0, 100]);
+        fill_in_cpu_card(API_CPU, monitor1);
+        fill_in_vmem_card(API_VMEM, monitor2);
+        fill_in_du_card(API_DISK, monitor3);
+    })
+
+    </script>
 
 {% endblock javascripts %}

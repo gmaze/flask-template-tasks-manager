@@ -1,3 +1,7 @@
+var API_TASKS;
+var API_TASKS_CANCEL;
+
+
 $('input[name=nb_floats]').change(function() { $('#nfloats_value').text($('input[name=nb_floats]').val()) });
 
 $('button[name=reset]').on('click', function(){

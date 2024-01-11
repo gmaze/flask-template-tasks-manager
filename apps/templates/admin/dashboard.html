@@ -1,0 +1,280 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Admin dashboard {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+    .progress {
+      background-color: #aef;
+      -webkit-box-shadow: none;
+      box-shadow: none;
+    }
+{% endblock stylesheets %}
+
+{% block content %}
+
+    <!-- [ Main Content ] start -->
+    <div class="pcoded-main-container">
+        <div class="pcoded-content">
+            <!-- [ Main Content ] start -->
+            <div class="row">
+
+                <!-- statistic start -->
+                <div class="col-md-12 col-lg-4">
+                    <div class="card seo-card overflow-hidden">
+                        <div class="card-body seo-statistic">
+                            <i class="feather icon-cpu f-20 text-c-red"></i>
+                            <h5 class="mb-1" id="cpu-current"></h5>
+                            <p id="cpu-label"></p>
+                        </div>
+                        <div class="seo-chart">
+                            <div id="cpu-card"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-4">
+                    <div class="card seo-card overflow-hidden">
+                        <div class="card-body seo-statistic">
+                            <i class="feather icon-server f-20 text-success"></i>
+                            <h5 class="mb-1" id="vmem-current"></h5>
+                            <p id="vmem-label"></p>
+                        </div>
+                        <div class="seo-chart">
+                            <div id="vmem-card"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-4">
+                    <div class="card seo-card overflow-hidden">
+                        <div class="card-body seo-statistic">
+                            <i class="feather icon-save f-20 text-c-blue"></i>
+                            <h5 class="mb-1" id="du-current"></h5>
+                            <p id="du-label"></p>
+                        </div>
+                        <div class="seo-chart">
+                            <div id="du-card"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- statistic end -->
+
+                <!-- [ List of ALL users ] start -->
+				<div class="col-md-12">
+					<div class="card table-card">
+						<div class="card-header">
+							<h5>List of users</h5>
+						</div>
+						<div class="card-body">
+                            <div class="table-responsive">
+                                <div class="customer-scroll">
+                                    <table class="table table-hover m-b-0" id="users_table">
+                                        <thead>
+                                            <tr>
+                                                <th><span>Users ID</span></th>
+                                                <th><span>Creation Date</span></th>
+{#                                                <th><span>Last Connection</span></th>#}
+                                                <th><span>login</span></th>
+                                                <th><span>Email</span></th>
+                                                <th><span>Role</span></th>
+                                                <th><span>Subscription Plan</span></th>
+                                                <th><span>Tasks Quota</span></th>
+                                                <th><span>Disk Usage</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- [ List of ALL users] end -->
+
+                <!-- [ List of ALL users tasks-page ] start -->
+				<div class="col-md-12">
+					<div class="card table-card">
+						<div class="card-header">
+							<h5>List of simulations</h5>
+						</div>
+						<div class="card-body">
+                            <div class="table-responsive">
+                                <div class="customer-scroll">
+                                    <table class="table table-hover m-b-0" id="tasks_table">
+                                        <thead>
+                                            <tr>
+                                                <th><span>Tasks ID</span></th>
+                                                <th><span>User</span></th>
+                                                <th><span>Status</span></th>
+                                                <th><span>Number of floats</span></th>
+                                                <th><span>Label</span></th>
+                                                <th><span>Actions</span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- [ List of ALL users tasks-page ] end -->
+
+
+            </div>
+            <!-- [ Main Content ] end -->
+        </div>
+    </div>
+    <!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <!-- Apex Chart -->
+    <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
+
+    <script src="/static/assets/js/pages/users.js"></script>
+    <script src="/static/assets/js/pages/plans.js"></script>
+    <script src="/static/assets/js/monitors.js"></script>
+    <script src="/static/assets/js/pages/simulations-launcher.js"></script>
+
+    <script>
+        var APIKEY = {{ current_user.apikey | tojson }};
+        API_CPU = {{ url_for("api_blueprint.monitors_default_cpu") | tojson }};
+        API_VMEM = {{ url_for("api_blueprint.monitors_default_vmem") | tojson }};
+        API_DISK = {{ url_for("api_blueprint.monitors_default_du") | tojson }};
+        API_USERS = {{ url_for("api_blueprint.users_user_list") | tojson }};
+        API_USERS_UPDATE = {{ url_for("api_blueprint.users_user_2") | tojson }};
+        API_PLANS = {{ url_for("api_blueprint.plans_plans") | tojson }};
+        API_TASKS = {{ url_for("api_blueprint.tasks_task_list") | tojson }};
+        API_TASKS_CANCEL = {{ url_for("api_blueprint.tasks_task_2") | tojson }};
+    </script>
+
+    <script>
+    function humanFileSize(bytes, si=false, dp=1) {
+        const thresh = si ? 1000 : 1024;
+
+        if (Math.abs(bytes) < thresh) {
+            return bytes + ' B';
+        }
+
+        const units = si
+        ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+        : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+        let u = -1;
+        const r = 10**dp;
+
+        do {
+            bytes /= thresh;
+            ++u;
+        } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+        return bytes.toFixed(dp) + ' ' + units[u];
+    }
+
+
+    get_html_quota_bar = function(data){
+        let quota_count = Number(data.quota_count);
+        let quota_left = Number(data.quota_left);
+        let quota_total = quota_count + quota_left;
+        let consumed = quota_count * 100 / quota_total;
+        if (consumed <= 25){
+            quota_color = 'success';
+        } else if (consumed <= 50) {
+            quota_color = 'info';
+        } else if (consumed <= 75) {
+            quota_color = 'warning';
+        } else if (consumed <= 100) {
+            quota_color = 'danger';
+        }
+
+        quota_html = quota_count + "/" + quota_total + " ("+consumed+"%)";
+        quota_html += "<div class='progress mt-1' style='height:4px;'>";
+        quota_html += "<div class='progress-bar bg-"+quota_color+" rounded' role='progressbar' ";
+        quota_html += "style='width: "+consumed+"%;' aria-valuenow='"+consumed+"' ";
+        quota_html += "aria-valuemin='0' aria-valuemax='100'>";
+        quota_html += "</div></div>";
+
+        return quota_html;
+    }
+
+    get_html_role = function(data){
+        let color;
+        if (data.level == 0) {
+            color = ["secondary", "white"];
+        } else if (data.level <= 50) {
+            color = ["success", "white"];
+        } else if (data.level <= 100) {
+            color = ["info", "white"];
+        } else {
+            color = ["light", "dark"];
+        }
+        //html = "<div class='p-1 m-1 bg-"+color[0]+" text-"+color[1]+"'>"+data.label+"</div>";
+        html = "<div class='p-0 m-0'>"+data.label+"</div>";
+        return html
+    }
+
+    function build_view(data, textStatus, jqXHR){
+        var html = '';
+        for(var i = 0; i < LIST_USERS.length; i++){
+            let created = new Date(LIST_USERS[i].created);
+            html += '<tr>'+
+                        '<td>' + LIST_USERS[i].id + '</td>' +
+                        '<td>' + created.toDateString() + '</td>' +
+                        //'<td>' + '</td>' +
+                        '<td>' + LIST_USERS[i].username + '</td>' +
+                        '<td>' + LIST_USERS[i].email + '</td>' +
+                        '<td>' + get_html_role(LIST_USERS[i].role) + '</td>' +
+                        '<td class="UserPlan" data-user-id="'+LIST_USERS[i].id+'">' + get_html_plan_btn(LIST_USERS[i]) + '</td>' +
+                        '<td>' + get_html_quota_bar(LIST_USERS[i].tasks) + '</td>' +
+                        '<td>' + humanFileSize(LIST_USERS[i].disk_usage) + '</td>' +
+                    '</tr>';
+            }
+        $('#users_table tbody').html(html);
+
+        // Attach buttons callback:
+        $(".UserPlan > div > button").each(function(){
+            $(this).on('click', function(){
+                let plan_name = $(this).text();
+                let plan_id;
+                for (let i = 0; i < LIST_OF_PLANS.length; i++) {
+                    if (plan_name === LIST_OF_PLANS[i].label){
+                        plan_id = LIST_OF_PLANS[i].id
+                    }
+                }
+                let user_id = $(this).closest('.UserPlan').data('user-id');
+                update_profile({'user_id': user_id, 'plan_id': plan_id}, list_users, build_view);
+            })
+        })
+    };
+
+    var RefreshTasksList = window.setInterval(function(){
+        fill_in_cpu_card(API_CPU, monitor1);
+        fill_in_vmem_card(API_VMEM, monitor2);
+        list_tasks(API_TASKS, API_TASKS_CANCEL);
+    }, 1000);
+
+    var RefreshTasksList = window.setInterval(function(){
+        fill_in_du_card(API_DISK, monitor3);
+        list_users().then(build_view);
+    }, 5000);
+
+    $( document ).ready(function() {
+        load_plans().then(list_users).then(build_view);
+        monitor1 = init_monitor("cpu-card", "%", ['#ff5370', '#ff869a'], [0,100]);
+        monitor2 = init_monitor("vmem-card", "%", ['#53ff70', '#86ff9a'], [0, 100]);
+        monitor3 = init_monitor("du-card", "%", ['#4099ff', '#4099ff'], [0, 100]);
+        fill_in_cpu_card(API_CPU, monitor1);
+        fill_in_vmem_card(API_VMEM, monitor2);
+        fill_in_du_card(API_DISK, monitor3);
+        $('button[name=reset]').trigger('click');
+        list_tasks(API_TASKS, API_TASKS_CANCEL);
+    })
+
+    </script>
+
+
+
+{% endblock javascripts %}

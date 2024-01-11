@@ -33,3 +33,15 @@ def admin_users():
         return render_template('home/page-403.html'), 403
 
 
+@blueprint.route('/dashboard', methods=['GET'])
+@login_required
+def admin_dashboard():
+    if current_user.is_authenticated:
+        if current_user.role_level < 100:
+            return render_template('home/page-401.html'), 401
+        else:
+            return render_template('admin/dashboard.html')
+    else:
+        return render_template('home/page-403.html'), 403
+
+

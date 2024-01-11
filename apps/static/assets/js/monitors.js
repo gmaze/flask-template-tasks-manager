@@ -5,25 +5,6 @@ var monitor1;
 var monitor2;
 var monitor3;
 
-var RefreshTasksList = window.setInterval(function(){
-    fill_in_cpu_card(API_CPU, monitor1);
-    fill_in_vmem_card(API_VMEM, monitor2);
-}, 1000);
-
-var RefreshTasksList = window.setInterval(function(){
-    fill_in_du_card(API_DISK, monitor3);
-}, 5000);
-
-
-$( document ).ready(function() {
-    monitor1 = init_monitor("cpu-card", "%", ['#ff5370', '#ff869a'], [0,100]);
-    monitor2 = init_monitor("vmem-card", "%", ['#53ff70', '#86ff9a'], [0, 100]);
-    monitor3 = init_monitor("du-card", "%", ['#4099ff', '#4099ff'], [0, 100]);
-    fill_in_cpu_card(API_CPU, monitor1);
-    fill_in_vmem_card(API_VMEM, monitor2);
-    fill_in_du_card(API_DISK, monitor3);
-})
-
 init_monitor = function(div_id,
                         labels,
                         colors,
