@@ -32,6 +32,7 @@ def default_route():
         nfloats = request.form['nb_floats']
 
         # Submit new simulation:
+        # This payload must match the Tasks model
         payload = {'user_id': current_user.get_id(),
                   'label': label,
                   'nfloats': nfloats}

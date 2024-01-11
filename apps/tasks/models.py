@@ -5,7 +5,10 @@ from apps import db
 import json
 from datetime import date, datetime
 from typing import List
-
+from flask import current_app
+from werkzeug.utils import secure_filename
+import os
+from pathlib import Path
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy.orm import Mapped
@@ -29,13 +32,13 @@ class Tasks(db.Model, TimestampMixin):
     user_id: Mapped[int] = mapped_column(ForeignKey("Users_table.id"))
     user: Mapped["Users"] = relationship(back_populates="tasks")
 
-    label = db.Column(db.String(64))
-    nfloats = db.Column(db.Integer)
-
     pid = db.Column(db.Integer)
     status = db.Column(db.String(64))
     progress = db.Column(db.Float, default=0)
     final_state = db.Column(db.String(64), default='?')
+
+    label = db.Column(db.String(64))
+    nfloats = db.Column(db.Integer)
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
@@ -57,17 +60,19 @@ class Tasks(db.Model, TimestampMixin):
         summary.append("\tUsername: %s" % self.user.username)
         summary.append("\tN-floats: %s" % self.nfloats)
         summary.append("\tlabel: %s" % self.label)
+        summary.append("\tstorage: %s" % self.storage_path)
         summary.append("Run:")
         summary.append("\tPID: %s" % self.pid)
         summary.append("\tStatus: %s" % self.status)
         summary.append("\tProgress: %s" % self.progress)
         summary.append("\tFinal state: %s" % self.final_state)
         return "\n".join(summary)
-        # return str("%s: %s (%s): %s" % (self.username, self.nfloats, self.status, self.label))
 
     def to_dict(self):
         params = {}
-        for k in ['id', 'user_id', 'label', 'nfloats', 'status', 'created', 'updated', 'pid', 'final_state', 'progress']:
+        for k in ['id', 'user_id',
+                  'label', 'nfloats',
+                  'status', 'created', 'updated', 'pid', 'final_state', 'progress', 'storage_path']:
             params[k] = getattr(self, k)
         return params
 
@@ -90,3 +95,13 @@ class Tasks(db.Model, TimestampMixin):
         """Return the oldest task created over the last 'period' in seconds"""
         stamp = datetime.utcnow() - timedelta(seconds=period)
         return self.query.filter(self.created >= stamp).all()
+
+    @property
+    def storage_path(self):
+        # Define path:
+        p = os.path.join(self.user.storage_path, str(self.id))
+
+        # Make sure this task has a storage path:
+        Path(p).mkdir(exist_ok=True)
+
+        return p

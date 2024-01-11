@@ -102,6 +102,7 @@ class Task(Resource):
         # Check if user quota allows for new tasks to be created:
         this_user = dbUsers.find_by_id(user_id)
         if this_user.tasks_desc_to_dict['quota_left'] > 0:
+            # This payload must match the Tasks model
             created = T.create(api.payload)
             return created
         else:

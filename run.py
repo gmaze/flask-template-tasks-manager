@@ -1,14 +1,16 @@
 # -*- encoding: utf-8 -*-
 """
+Modified by gmaze (2024)
 Copyright (c) 2019 - present AppSeed.us
 """
 
 import os
-from   flask_migrate import Migrate
-from   flask_minify  import Minify
-from   sys import exit
+from flask_migrate import Migrate
+from flask_minify import Minify
+from sys import exit
 
 from apps.config import config_dict
+from apps.monitors.src import SysTemMonitor
 from apps import create_app, db
 
 # WARNING: Don't run with debug turned on in production!
@@ -25,6 +27,13 @@ try:
 except KeyError:
     exit('Error: Invalid <config_mode>. Expected values [Debug, Production] ')
 
+# Clean-up monitoring logs
+try:
+    os.remove(SysTemMonitor(app=None, db=None).lockfile)
+except OSError:
+    pass
+
+# Set up the app
 app = create_app(app_config)
 Migrate(app, db)
 
@@ -38,4 +47,6 @@ if DEBUG:
     app.logger.info('ASSETS_ROOT      = ' + app_config.ASSETS_ROOT )
 
 if __name__ == "__main__":
+
+    # Start the app
     app.run()

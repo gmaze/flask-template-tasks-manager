@@ -80,6 +80,7 @@ class TasksManager_proto:
     def create(self, data: dict) -> dict:
         # print('Create new task with:', data)
         a_task = self._register(data)
+        # print('Registered task: ', a_task)
         a_task, result = self._launch(a_task)
         if result:
             # Update status:

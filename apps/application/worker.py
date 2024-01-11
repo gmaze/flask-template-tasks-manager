@@ -86,10 +86,49 @@ def load_params(data):
 
 
 def dummy_task(data):
+    """Execute tasks using data dict parameters
+
+    data was sent by :meth:`TasksManager.create`
+    data is of the :meth:`Tasks.to_dict` output
+    data eg:
+    {"id": 3,
+    "user_id": 2,
+    "label": "",
+    "nfloats": 12000,
+    "status": "queue",
+    "created": "2024-01-11T09:19:23.322712",
+    "updated": "2024-01-11T09:19:23.322723",
+    "pid": null,
+    "final_state": "?",
+    "progress": 0.0,
+    "storage_path": "/Users/gmaze/git/github/gmaze/flask-template-tasks-manager/apps/static/results/pro/3"}
+    """
+    def make_dummy_file(fname, bsize=1024):
+        f = open(fname, "wb")
+        f.seek(bsize - 1)
+        f.write(b"\0")
+        f.close()
+
+    # Save data parameters to file:
+    if 'storage_path' in data:
+        fout = os.path.join(data['storage_path'], "data.json")
+    else:
+        fout = logfile().replace("worker.log", "worker_%i.json" % data['id'])
+    with open(fout, 'w') as fp:
+        json.dump(data, fp)
+
+    # Dummy task
     TimeLapse = int(int(data['nfloats']) / 10 / 10)
     for i in range(TimeLapse):
         time.sleep(1)
         log.info("progress: %0.1f" % (i*100/TimeLapse))
+
+    # Dummy output:
+    if 'storage_path' in data:
+        fout = os.path.join(data['storage_path'], "dummy_result_file")
+        make_dummy_file(fout, 1024*TimeLapse*2)
+
+    # Return boolean output to indicate success or failure
     return int(time.time()) & 0x1
 
 

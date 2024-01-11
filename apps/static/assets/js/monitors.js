@@ -1,3 +1,6 @@
+var API_CPU;
+var API_VMEM;
+var API_DISK;
 var monitor1;
 var monitor2;
 var monitor3;

@@ -31,7 +31,9 @@ def register_blueprints(app):
 
 def start_monitors(app):
     from .monitors.src import SysTemMonitor
-    SysTemMonitor(app=app, db=db, refresh_rate=app.config['REFRESH_MONITORS']).start()
+    sm = SysTemMonitor(app=app, db=db, refresh_rate=app.config['REFRESH_MONITORS'])
+    sm.start()
+    app.config['MONITOR_LOCKFILE'] = sm.lockfile
 
 
 def configure_database(app):
