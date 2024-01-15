@@ -4,22 +4,22 @@
 # HELP
 #
 # Created by gmaze on 28/11/2023
-
+import time
 from abc import abstractmethod
 from subprocess import Popen, PIPE
 from flask_restx.errors import abort
-from flask import request
+from flask import request, current_app
 from functools import wraps
 import os
 from signal import SIGKILL
 import psutil
 from typing import Union, List
 from sqlalchemy.orm.scoping import scoped_session
+import json
 
 from apps.tasks.models import Tasks as dbTasks
-from apps.application import read_data_for_pid
+from apps.application import read_data_for_pid, PoolHelper
 from apps.authentication.models import Users
-
 
 BASEDIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
@@ -79,12 +79,13 @@ class TasksManager_proto:
 
     def create(self, data: dict) -> dict:
         # print('Create new task with:', data)
-        a_task = self._register(data)
+
+        a_task = self._register(data)  # Register task submission to DB
         # print('Registered task: ', a_task)
+
         a_task, result = self._launch(a_task)
         if result:
             # Update status:
-            # print("Task is submitted")
             a_task.status = 'submitted'
             self.db_session.commit()
         else:
@@ -233,16 +234,26 @@ class TasksManager(TasksManager_proto):
 
         try:
             params = a_task.to_json()
-            # print(params)
+            # data = json.loads(params)
 
             worker_script = os.path.sep.join([BASEDIR, "application", "worker.py"])
             # print(worker_script)
 
+            # print("Dummy PoolHelper")
+            # p = PoolHelper()
+            # print(p)
+
+            # print("Starting PoolHelper for job id: '%i'" % data['id'])
+            # pool = PoolHelper()
+            # pool.checkin(job_id=data['id'])
+            # print("\nWAITING IN POOL\n")
+            # time.sleep(10)
+            # pool.checkout(job_id=data['id'])
+            # with PoolHelper(job_id=data['id']):
+                # print("\nWORKING IN POOL\n")
+                # time.sleep(10)
             p = Popen(['python', worker_script, params], stdout=PIPE, stderr=PIPE, text=True)
-            # output, errors = p.communicate()
-            # print('output', output)
-            # print('errors', errors)
-            # print("Task submitted with PID: %i" % p.pid)
+
             a_task.pid = p.pid
             self.db_session.commit()
 
@@ -258,6 +269,9 @@ class TasksManager(TasksManager_proto):
             try:
                 self.kill_pid(a_task.pid)
                 # os.kill(a_task.pid, SIGKILL)
+
+                # We also need to chekout this task from the Pool of workers:
+                PoolHelper().checkout(a_task.id)
 
                 a_task.final_state = '?'
                 self.db_session.commit()

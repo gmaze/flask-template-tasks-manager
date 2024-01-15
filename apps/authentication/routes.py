@@ -62,7 +62,7 @@ def login():
         if user and verify_pass(password, user.password):
 
             login_user(user, remember=True)
-            print(user)
+            # print(user)
             return redirect(url_for('authentication_blueprint.route_default'))
 
         # Something (user or pass) is not ok

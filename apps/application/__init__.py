@@ -7,3 +7,4 @@
 
 
 from .worker import read_data_for_pid
+from .worker import PoolHelper

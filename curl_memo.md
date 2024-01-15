@@ -6,10 +6,10 @@
 curl -X 'POST' \
   'http://127.0.0.1:5000/api/1/tasks/' \
   -H 'accept: application/json' \
-  -H 'X-API-KEY: e70928e4ac1f4f1f8be06089c7d4cc0e' \
+  -H 'X-API-KEY: 4e0a718d648844a3a7f8cebc6c06ea61' \
   -H 'Content-Type: application/json' \
   -d '{
-  "nfloats": 10,
+  "nfloats": 100,
   "label": ""
 }'
 ```

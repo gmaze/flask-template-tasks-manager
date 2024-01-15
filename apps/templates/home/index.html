@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Dashboard {% endblock %} 
+{% block title %} Home {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -53,42 +53,5 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-
-    <!-- Apex Chart -->
-    <script src="/static/assets/js/plugins/apexcharts.min.js"></script>
-
-    <!-- custom-chart js -->
-    <script src="/static/assets/js/monitors.js"></script>
-
-    <script>
-    API_CPU = {{ url_for("api_blueprint.monitors_default_cpu") | tojson }};
-    API_VMEM = {{ url_for("api_blueprint.monitors_default_vmem") | tojson }};
-    API_DISK = {{ url_for("api_blueprint.monitors_default_du") | tojson }};
-    {% if current_user.is_authenticated %}
-    var APIKEY = {{ current_user.apikey | tojson }};
-    {%  else %}
-    var APIKEY = "";
-    {%  endif %}
-
-    var RefreshTasksList = window.setInterval(function(){
-        fill_in_cpu_card(API_CPU, monitor1);
-        fill_in_vmem_card(API_VMEM, monitor2);
-    }, 1000);
-
-    var RefreshTasksList = window.setInterval(function(){
-        fill_in_du_card(API_DISK, monitor3);
-    }, 5000);
-
-
-    $( document ).ready(function() {
-        monitor1 = init_monitor("cpu-card", "%", ['#ff5370', '#ff869a'], [0,100]);
-        monitor2 = init_monitor("vmem-card", "%", ['#53ff70', '#86ff9a'], [0, 100]);
-        monitor3 = init_monitor("du-card", "%", ['#4099ff', '#4099ff'], [0, 100]);
-        fill_in_cpu_card(API_CPU, monitor1);
-        fill_in_vmem_card(API_VMEM, monitor2);
-        fill_in_du_card(API_DISK, monitor3);
-    })
-
-    </script>
 
 {% endblock javascripts %}

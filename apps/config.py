@@ -58,6 +58,8 @@ class Config(object):
     #
     REFRESH_MONITORS = 1  # In seconds
     STORAGE_PATH = os.path.sep.join([basedir, "static", "results"])
+    MAX_CONCURRENT_TASKS = 5  # Max nb of tasks running simultaneously
+
 
 class ProductionConfig(Config):
     DEBUG = False

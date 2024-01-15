@@ -41,7 +41,7 @@ Set Up Flask Environment
 
 ```bash
 export FLASK_APP=run.py
-export FLASK_DEBUG=1
+export DEBUG=1
 ```
 
 Start the app
