@@ -62,7 +62,7 @@ class TasksManager_proto:
         return self.tasks_by_user_id(user.id)
 
     def _register(self, data) -> dbTasks:
-        default_data = {'label': None, 'nfloats': 1000, 'status': 'queue'}
+        default_data = {'label': None, 'nfloats': 1000, 'status': 'registered'}
         params = {**default_data, **data}
 
         a_task = dbTasks(**params)
@@ -270,7 +270,7 @@ class TasksManager(TasksManager_proto):
                 self.kill_pid(a_task.pid)
                 # os.kill(a_task.pid, SIGKILL)
 
-                # We also need to chekout this task from the Pool of workers:
+                # We also need to check out this task from the Pool of workers:
                 PoolHelper().checkout(a_task.id)
 
                 a_task.final_state = '?'

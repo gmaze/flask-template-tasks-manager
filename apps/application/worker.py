@@ -53,7 +53,7 @@ class PoolHelper:
         self.max_concurrent = max
         self._init()
         self.job_id = job_id
-        log.info("Pool instantiated: %s" % self)
+        log.info("Pool instantiated")
 
     def _json_serial(self, obj):
         """JSON serializer for objects not serializable by default json code"""
@@ -67,9 +67,9 @@ class PoolHelper:
             data = self._default_data
             data['max_worker'] = self.max_concurrent
             self._write(data)
-            log.info("Pool initiated")
-        else:
-            log.info("Pool already initiated")
+            # log.info("Pool initiated")
+        # else:
+            # log.info("Pool already initiated")
 
     def _read(self):
         with open(self.lockfile, "r") as f:
@@ -89,14 +89,14 @@ class PoolHelper:
         return len(self._read()['workers'])
 
     def checkin(self, job_id: int):
-        log.debug("Checking-in job_id=%i" % job_id)
+        log.debug("Pool checking-in job_id=%i" % job_id)
         data = self._read()
         if self.concurrent < self.max_concurrent:
             data['workers'].append(job_id)
             self._write(data)
         else:
             warnings.warn("This Pool has reached its maximum number of concurrent worker, try again later")
-        log.info("Pool check-in")
+        # log.info("Pool check-in")
         return self
 
     def checkout(self, job_id: int):
@@ -104,11 +104,11 @@ class PoolHelper:
         if job_id in data['workers']:
             data['workers'].remove(job_id)
             self._write(data)
-        log.info("Pool check-out")
+        log.info("Pool checked-out job_id=%i" % job_id)
         return self
 
     def __enter__(self):
-        log.debug("Pool entering context")
+        # log.debug("Pool entering context")
         while self.concurrent >= self.max_concurrent:
             # print("Pool is full")
             time.sleep(1)
@@ -204,17 +204,17 @@ def dummy_task(data):
     data was sent by :meth:`TasksManager.create`
     data is of the :meth:`Tasks.to_dict` output
     data eg:
-    {"id": 3,
-    "user_id": 2,
-    "label": "",
-    "nfloats": 12000,
-    "status": "queue",
-    "created": "2024-01-11T09:19:23.322712",
-    "updated": "2024-01-11T09:19:23.322723",
-    "pid": null,
-    "final_state": "?",
-    "progress": 0.0,
-    "storage_path": "/Users/gmaze/git/github/gmaze/flask-template-tasks-manager/apps/static/results/pro/3"}
+        {"id": 3,
+        "user_id": 2,
+        "label": "",
+        "nfloats": 12000,
+        "status": "queue",
+        "created": "2024-01-11T09:19:23.322712",
+        "updated": "2024-01-11T09:19:23.322723",
+        "pid": null,
+        "final_state": "?",
+        "progress": 0.0,
+        "storage_path": "/Users/gmaze/git/github/gmaze/flask-template-tasks-manager/apps/static/results/pro/3"}
     """
     def make_dummy_file(fname, bsize=1024):
         f = open(fname, "wb")
@@ -258,15 +258,9 @@ if __name__ == '__main__':
     # sys.argv[0]  # this script name
     if len(sys.argv) == 2:
         data = load_params(sys.argv[1])  # Read arguments from a json string
-
-        # from .util import PoolHelper
-        # log.debug("PoolHelper imported")
-
-        # p = PoolHelper(max=2)
-        # log.debug("PoolHelper: %s" % p)
         log.info("status: queue")
 
-        with PoolHelper(job_id=data['id'], max=2):
+        with PoolHelper(job_id=data['id']):
             log.info("status: running")
             try:
                 outcome = dummy_task(data)
